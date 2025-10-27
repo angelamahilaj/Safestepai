@@ -1,7 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import * as Speech from 'expo-speech';
 import * as Haptics from 'expo-haptics';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Platform } from 'react-native';
 
 type VoiceSettings = {
@@ -12,11 +12,28 @@ type VoiceSettings = {
 
 export const [AccessibilityProvider, useAccessibility] = createContextHook(() => {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
     rate: 0.8,
     pitch: 1.0,
     volume: 1.0,
   });
+
+  useEffect(() => {
+    const checkLanguages = async () => {
+      if (Platform.OS !== 'web') {
+        try {
+          const languages = await Speech.getAvailableVoicesAsync();
+          const languageCodes = languages.map(v => v.language);
+          setAvailableLanguages(languageCodes);
+          console.log('[Voice] Available languages:', languageCodes);
+        } catch (error) {
+          console.error('[Voice] Error checking languages:', error);
+        }
+      }
+    };
+    checkLanguages();
+  }, []);
 
   const speak = useCallback(async (text: string) => {
     if (!text || typeof text !== 'string') {
@@ -39,6 +56,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
                 window.speechSynthesis.addEventListener('voiceschanged', () => {
                   resolve();
                 }, { once: true });
+                setTimeout(() => resolve(), 1000);
               } else {
                 resolve();
               }
@@ -83,8 +101,14 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
       } else {
         try {
           console.log('[Voice] Using native speech');
+          
+          const hasAlbanian = availableLanguages.some(lang => lang.toLowerCase().startsWith('sq'));
+          const language = hasAlbanian ? 'sq-AL' : undefined;
+          
+          console.log('[Voice] Language:', language || 'default');
+          
           await Speech.speak(text, {
-            language: 'sq-AL',
+            language,
             rate: voiceSettings.rate,
             pitch: voiceSettings.pitch,
             volume: voiceSettings.volume,
@@ -116,7 +140,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
       });
       setIsSpeaking(false);
     }
-  }, [voiceSettings]);
+  }, [voiceSettings, availableLanguages]);
 
   const stopSpeaking = useCallback(() => {
     console.log('[Voice] Stopping speech');

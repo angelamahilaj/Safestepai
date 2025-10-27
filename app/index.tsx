@@ -44,73 +44,73 @@ export default function HomeScreen() {
   return (
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <View style={styles.deviceSection}>
+          <Text style={styles.deviceSectionTitle}>Lidh Pajisjet</Text>
+          <View style={styles.deviceButtons}>
+            <Pressable
+              style={[
+                styles.deviceButton,
+                connectedGlasses?.connected && styles.deviceButtonConnected
+              ]}
+              onPress={() => {
+                if (Platform.OS === 'web' && !isInitialized.current) {
+                  initializeWebSpeech();
+                  isInitialized.current = true;
+                }
+                if (connectedGlasses?.connected) {
+                  disconnectDevice('glasses');
+                } else {
+                  connectDevice('glasses');
+                }
+              }}
+              disabled={isScanning}
+              accessibilityLabel="Lidh syzet inteligjente"
+              accessibilityHint="Prek për të lidhur ose shkëputur syzet inteligjente"
+            >
+              <Glasses size={32} color={Colors.white} strokeWidth={2} />
+              <Text style={styles.deviceButtonText}>
+                {connectedGlasses?.connected ? 'Syze të Lidhura' : 'Lidh Syze'}
+              </Text>
+              {connectedGlasses?.connected && (
+                <View style={styles.connectedIndicator} />
+              )}
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.deviceButton,
+                connectedStick?.connected && styles.deviceButtonConnected
+              ]}
+              onPress={() => {
+                if (Platform.OS === 'web' && !isInitialized.current) {
+                  initializeWebSpeech();
+                  isInitialized.current = true;
+                }
+                if (connectedStick?.connected) {
+                  disconnectDevice('stick');
+                } else {
+                  connectDevice('stick');
+                }
+              }}
+              disabled={isScanning}
+              accessibilityLabel="Lidh shkopun inteligjent"
+              accessibilityHint="Prek për të lidhur ose shkëputur shkopun inteligjent"
+            >
+              <Locate size={32} color={Colors.white} strokeWidth={2} />
+              <Text style={styles.deviceButtonText}>
+                {connectedStick?.connected ? 'Shkop i Lidhur' : 'Lidh Shkop'}
+              </Text>
+              {connectedStick?.connected && (
+                <View style={styles.connectedIndicator} />
+              )}
+            </Pressable>
+          </View>
+        </View>
+
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.deviceSection}>
-            <Text style={styles.deviceSectionTitle}>Lidh Pajisjet</Text>
-            <View style={styles.deviceButtons}>
-              <Pressable
-                style={[
-                  styles.deviceButton,
-                  connectedGlasses?.connected && styles.deviceButtonConnected
-                ]}
-                onPress={() => {
-                  if (Platform.OS === 'web' && !isInitialized.current) {
-                    initializeWebSpeech();
-                    isInitialized.current = true;
-                  }
-                  if (connectedGlasses?.connected) {
-                    disconnectDevice('glasses');
-                  } else {
-                    connectDevice('glasses');
-                  }
-                }}
-                disabled={isScanning}
-                accessibilityLabel="Lidh syzet inteligjente"
-                accessibilityHint="Prek për të lidhur ose shkëputur syzet inteligjente"
-              >
-                <Glasses size={32} color={Colors.white} strokeWidth={2} />
-                <Text style={styles.deviceButtonText}>
-                  {connectedGlasses?.connected ? 'Syze të Lidhura' : 'Lidh Syze'}
-                </Text>
-                {connectedGlasses?.connected && (
-                  <View style={styles.connectedIndicator} />
-                )}
-              </Pressable>
-
-              <Pressable
-                style={[
-                  styles.deviceButton,
-                  connectedStick?.connected && styles.deviceButtonConnected
-                ]}
-                onPress={() => {
-                  if (Platform.OS === 'web' && !isInitialized.current) {
-                    initializeWebSpeech();
-                    isInitialized.current = true;
-                  }
-                  if (connectedStick?.connected) {
-                    disconnectDevice('stick');
-                  } else {
-                    connectDevice('stick');
-                  }
-                }}
-                disabled={isScanning}
-                accessibilityLabel="Lidh shkopun inteligjent"
-                accessibilityHint="Prek për të lidhur ose shkëputur shkopun inteligjent"
-              >
-                <Locate size={32} color={Colors.white} strokeWidth={2} />
-                <Text style={styles.deviceButtonText}>
-                  {connectedStick?.connected ? 'Shkop i Lidhur' : 'Lidh Shkop'}
-                </Text>
-                {connectedStick?.connected && (
-                  <View style={styles.connectedIndicator} />
-                )}
-              </Pressable>
-            </View>
-          </View>
-
           <View style={styles.header}>
             <Pressable
               style={styles.profileButton}
@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingTop: 0,
   },
   scrollContent: {
     padding: 20,
@@ -312,8 +313,11 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   deviceSection: {
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
     gap: 12,
+    backgroundColor: Colors.darkNavy,
   },
   deviceSectionTitle: {
     fontSize: 24,

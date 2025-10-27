@@ -45,7 +45,7 @@ export default function HomeScreen() {
             <Pressable
               style={styles.profileButton}
               onPress={() => {
-                announceAndVibrate('Opening your profile', 'light');
+                announceAndVibrate('Your profile', 'light');
                 router.push('/profile');
               }}
               accessibilityLabel="Your profile button"
@@ -65,13 +65,13 @@ export default function HomeScreen() {
             onPress={() => {
               setIsListening(!isListening);
               if (!isListening) {
-                announceAndVibrate('Listening. Please speak your command.', 'medium');
+                announceAndVibrate('Voice command. Listening. Please speak your command.', 'medium');
                 setTimeout(() => {
                   setIsListening(false);
                   speak('Say: Navigation, Camera, Health, Emergency, Read text, Currency, or Location.');
                 }, 3000);
               } else {
-                announceAndVibrate('Stopped listening', 'light');
+                announceAndVibrate('Voice command. Stopped listening', 'light');
               }
             }}
             accessibilityLabel="Voice command button"

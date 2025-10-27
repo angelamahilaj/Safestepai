@@ -71,42 +71,30 @@ export default function VisionScreen() {
       console.log('[Vision] Image captured successfully, size:', photo.base64.length);
       console.log('[Vision] Sending to AI for analysis...');
 
-      let description: string;
-      try {
-        console.log('[Vision] Calling generateText API...');
-        description = await generateText({
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
-                },
-                {
-                  type: 'image',
-                  image: `data:image/jpeg;base64,${photo.base64}`,
-                },
-              ],
-            },
-          ],
-        });
-        console.log('[Vision] API response received successfully');
-      } catch (apiError: any) {
-        console.error('[Vision] API Error:', apiError);
-        console.error('[Vision] Error type:', typeof apiError);
-        console.error('[Vision] Error message:', apiError?.message);
-        console.error('[Vision] Error stack:', apiError?.stack);
-        
-        const errorMsg = apiError?.message || String(apiError);
-        if (errorMsg.includes('JSON') || errorMsg.includes('Internal Server Error') || errorMsg.includes('Internal S')) {
-          throw new Error('Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.');
-        } else if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
-          throw new Error('Gabim në lidhjen me serverin. Ju lutem kontrolloni internetin tuaj.');
-        } else if (errorMsg.includes('timeout')) {
-          throw new Error('Koha e pritjes skadoi. Ju lutem provoni përsëri.');
-        }
-        throw new Error('Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.');
+      console.log('[Vision] Calling generateText API...');
+      
+      const description = await generateText({
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
+              },
+              {
+                type: 'image',
+                image: `data:image/jpeg;base64,${photo.base64}`,
+              },
+            ],
+          },
+        ],
+      });
+      
+      console.log('[Vision] API response received successfully');
+      
+      if (!description || typeof description !== 'string') {
+        throw new Error('Përgjigje e pavlefshme nga AI');
       }
 
       console.log('[Vision] Description received successfully');
@@ -114,37 +102,28 @@ export default function VisionScreen() {
       speak(description);
       announceAndVibrate('Analiza u krye', 'success');
     } catch (error: any) {
-      console.error('[Vision] Error caught:', error);
-      console.error('[Vision] Error type:', typeof error);
-      console.error('[Vision] Error message:', error?.message);
-      try {
-        console.error('[Vision] Full error details:', JSON.stringify({
-          message: error?.message,
-          name: error?.name,
-          cause: error?.cause,
-        }, null, 2));
-      } catch {
-        console.error('[Vision] Could not stringify error');
-      }
+      console.error('[Vision] Error:', error);
+      console.error('[Vision] Error details:', {
+        name: error?.name,
+        message: error?.message,
+        type: typeof error,
+      });
       
-      let errorMessage = 'Na vjen keq, nuk mund të analizoj skenën.';
-      const errorString = error?.message || error?.toString() || '';
+      let errorMessage = 'Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.';
       
-      if (errorString.includes('JSON') || errorString.includes('SyntaxError') || errorString.includes('Internal Server Error') || errorString.includes('Internal S')) {
-        errorMessage = 'Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.';
-        console.error('[Vision] API returned invalid response - service may be down');
-      } else if (errorString.includes('AI nuk është i disponueshëm') || errorString.includes('disponueshëm')) {
-        errorMessage = errorString;
-      } else if (errorString.includes('Network request failed') || errorString.includes('fetch') || errorString.includes('network')) {
-        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
-        console.error('[Vision] Network error - please check:');
-        console.error('  1. Internet connection is active');
-        console.error('  2. API service is available');
-      } else if (errorString.includes('Failed to capture image') || errorString.includes('camera')) {
+      const errorStr = String(error?.message || error || '');
+      
+      if (errorStr.toLowerCase().includes('network') || errorStr.toLowerCase().includes('fetch failed')) {
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit.';
+      } else if (errorStr.toLowerCase().includes('camera') || errorStr.includes('capture')) {
         errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
-      } else if (errorString.includes('timeout')) {
+      } else if (errorStr.toLowerCase().includes('timeout')) {
         errorMessage = 'Koha e pritjes skadoi. Ju lutem provoni përsëri.';
+      } else if (errorStr.includes('pavlefshme')) {
+        errorMessage = 'Përgjigje e pavlefshme nga AI. Ju lutem provoni përsëri.';
       }
+      
+      console.error('[Vision] User-facing error:', errorMessage);
       
       speak(errorMessage);
       announceAndVibrate('Analiza dështoi', 'error');

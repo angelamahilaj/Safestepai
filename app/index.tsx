@@ -45,7 +45,8 @@ export default function HomeScreen() {
     <View style={styles.backgroundContainer}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.deviceSection}>
-          <Text style={styles.deviceSectionTitle}>Lidh Pajisjet</Text>
+          <Text style={styles.deviceSectionTitle}>🔗 Lidh Pajisjet 🔗</Text>
+          <Text style={styles.deviceSectionSubtitle}>Prek për të lidhur pajisjet tuaja inteligjente</Text>
           <View style={styles.deviceButtons}>
             <Pressable
               style={[
@@ -320,11 +321,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darkNavy,
   },
   deviceSectionTitle: {
-    fontSize: 24,
-    fontWeight: '700' as const,
+    fontSize: 28,
+    fontWeight: '900' as const,
     color: Colors.white,
     textAlign: 'center',
     marginBottom: 4,
+  },
+  deviceSectionSubtitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: Colors.lightGray,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   deviceButtons: {
     flexDirection: 'row',

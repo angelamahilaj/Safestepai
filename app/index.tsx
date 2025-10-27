@@ -23,7 +23,7 @@ export default function HomeScreen() {
   useEffect(() => {
     if (isAuthenticated && user) {
       const timer = setTimeout(() => {
-        speak(`Welcome back ${user.name}. Safe Step A I is ready to assist you.`);
+        speak(`Mirë se erdhe ${user.name}. Safe Step A I është gati për t'ju ndihmuar.`);
       }, 500);
       
       return () => clearTimeout(timer);
@@ -45,18 +45,18 @@ export default function HomeScreen() {
             <Pressable
               style={styles.profileButton}
               onPress={() => {
-                announceAndVibrate('Your profile', 'light');
+                announceAndVibrate('Profili juaj', 'light');
                 router.push('/profile');
               }}
-              accessibilityLabel="Your profile button"
-              accessibilityHint="View and edit your profile and medical information"
+              accessibilityLabel="Butoni i profilit tuaj"
+              accessibilityHint="Shikoni dhe redaktoni profilin dhe informacionin mjekësor"
             >
               <UserIcon size={32} color={Colors.white} strokeWidth={2} />
             </Pressable>
             <Text style={styles.logo}>SafeStepAI</Text>
-            <Text style={styles.subtitle}>Your Vision Assistant</Text>
+            <Text style={styles.subtitle}>Asistenti Juaj i Shikimit</Text>
             {user && (
-              <Text style={styles.welcomeText}>Hello, {user.name}!</Text>
+              <Text style={styles.welcomeText}>Përshëndetje, {user.name}!</Text>
             )}
           </View>
 
@@ -65,85 +65,85 @@ export default function HomeScreen() {
             onPress={() => {
               setIsListening(!isListening);
               if (!isListening) {
-                announceAndVibrate('Voice command. Listening. Please speak your command.', 'medium');
+                announceAndVibrate('Komandë me zë. Duke dëgjuar. Ju lutem flisni komandën tuaj.', 'medium');
                 setTimeout(() => {
                   setIsListening(false);
-                  speak('Say: Navigation, Camera, Health, Emergency, Read text, Currency, or Location.');
+                  speak('Thuaj: Navigim, Kamera, Shëndet, Emergjencë, Lexo tekst, Valutë, ose Vendndodhje.');
                 }, 3000);
               } else {
-                announceAndVibrate('Voice command. Stopped listening', 'light');
+                announceAndVibrate('Komandë me zë. Ndali dëgjimin', 'light');
               }
             }}
-            accessibilityLabel="Voice command button"
-            accessibilityHint="Tap to speak a voice command"
+            accessibilityLabel="Butoni i komandës me zë"
+            accessibilityHint="Prekni për të folur një komandë me zë"
           >
             <View style={[styles.voiceButtonInner, isListening && styles.voiceButtonListening]}>
               <Mic size={64} color={Colors.white} strokeWidth={2.5} />
             </View>
             <Text style={styles.voiceButtonText}>
-              {isListening ? 'Listening...' : 'Tap and Speak'}
+              {isListening ? 'Duke dëgjuar...' : 'Prek dhe Fol'}
             </Text>
           </Pressable>
 
           <View style={styles.grid}>
             <AccessibleButton
-              title="What Do You See?"
+              title="Çfarë Sheh?"
               icon={<Eye size={48} color={Colors.white} />}
               onPress={() => router.push('/vision')}
-              accessibilityLabel="What do you see? Opens camera to describe your surroundings"
-              accessibilityHint="Activates AI vision to describe what the camera sees"
+              accessibilityLabel="Çfarë sheh? Hap kamerën për të përshkruar rrethinën tuaj"
+              accessibilityHint="Aktivizon vizionin AI për të përshkruar atë që shikon kamera"
             />
 
             <AccessibleButton
-              title="Read Text"
+              title="Lexo Tekst"
               icon={<FileText size={48} color={Colors.white} />}
               onPress={() => router.push('/text-reader')}
               variant="secondary"
-              accessibilityLabel="Read text. Opens camera to read text from documents and signs"
-              accessibilityHint="Uses OCR to read text aloud"
+              accessibilityLabel="Lexo tekst. Hap kamerën për të lexuar tekst nga dokumentet dhe tabelat"
+              accessibilityHint="Përdor OCR për të lexuar tekstin me zë të lartë"
             />
 
             <AccessibleButton
-              title="Identify Currency"
+              title="Identifiko Valutë"
               icon={<Banknote size={48} color={Colors.white} />}
               onPress={() => router.push('/currency')}
-              accessibilityLabel="Identify currency. Opens camera to recognize banknotes"
-              accessibilityHint="Identifies money denomination"
+              accessibilityLabel="Identifiko valutë. Hap kamerën për të njohur bankënotat"
+              accessibilityHint="Identifikon vlerën e parasë"
             />
 
             <AccessibleButton
-              title="Navigation"
+              title="Navigim"
               icon={<Navigation2 size={48} color={Colors.white} />}
               onPress={() => router.push('/navigation')}
-              accessibilityLabel="Navigation. Opens navigation and mobility assistance"
-              accessibilityHint="Step-by-step directions and obstacle detection"
+              accessibilityLabel="Navigim. Hap navigimin dhe ndihmën për lëvizshmëri"
+              accessibilityHint="Udhëzime hap pas hapi dhe zbulim pengesash"
             />
 
             <AccessibleButton
-              title="Where Am I?"
+              title="Ku Jam?"
               icon={<MapPin size={48} color={Colors.white} />}
               onPress={() => router.push('/location')}
               variant="secondary"
-              accessibilityLabel="Where am I? Gets your current location"
-              accessibilityHint="Provides your current address and nearby landmarks"
+              accessibilityLabel="Ku jam? Merr vendndodhjen tuaj aktuale"
+              accessibilityHint="Jep adresën tuaj aktuale dhe pikat e referimit në afërsi"
             />
 
             <AccessibleButton
-              title="Health Monitor"
+              title="Monitorim Shëndetësor"
               icon={<Heart size={48} color={Colors.white} />}
               onPress={() => router.push('/health')}
               variant="secondary"
-              accessibilityLabel="Health monitor. Track your health and medications"
-              accessibilityHint="Medication reminders and health tracking"
+              accessibilityLabel="Monitorim shëndetësor. Gjurmoni shëndetin dhe ilaçet tuaja"
+              accessibilityHint="Kujtuese për ilaçe dhe gjurmim shëndetësor"
             />
 
             <AccessibleButton
-              title="EMERGENCY SOS"
+              title="SOS EMERGJENCË"
               icon={<AlertCircle size={56} color={Colors.white} />}
               onPress={() => router.push('/emergency')}
               variant="emergency"
-              accessibilityLabel="Emergency SOS. Quick access to emergency help"
-              accessibilityHint="Opens emergency contact options"
+              accessibilityLabel="SOS Emergjencë. Akses i shpejtë në ndihmë emergjence"
+              accessibilityHint="Hap opsionet e kontaktit të emergjencës"
             />
           </View>
         </ScrollView>

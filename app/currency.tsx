@@ -17,7 +17,7 @@ export default function CurrencyScreen() {
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    speak('Currency identifier activated. Point camera at money and tap identify button.');
+    speak('Identifikuesi i valutës u aktivizua. Drejtoni kamerën drejt parasë dhe prekni butonin identifiko.');
     
     return () => {
       console.log('[Currency] Cleaning up camera');
@@ -37,13 +37,13 @@ export default function CurrencyScreen() {
       <View style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
           <Text style={styles.permissionText}>
-            Camera access is needed to identify currency
+            Qasja në kamerë është e nevojshme për të identifikuar valutën
           </Text>
           <Pressable style={styles.permissionButton} onPress={requestPermission}>
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text style={styles.permissionButtonText}>Jep Leje</Text>
           </Pressable>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.backButtonText}>Kthehu Prapa</Text>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -54,7 +54,7 @@ export default function CurrencyScreen() {
     if (!cameraRef.current || isIdentifying) return;
 
     setIsIdentifying(true);
-    announceAndVibrate('Identifying currency. Please wait.', 'medium');
+    announceAndVibrate('Duke identifikuar valutën. Ju lutem prisni.', 'medium');
 
     try {
       console.log('[Currency] Starting image capture...');
@@ -92,7 +92,7 @@ export default function CurrencyScreen() {
       console.log('[Currency] Identification successful');
       setLastResult(result);
       speak(result);
-      announceAndVibrate('Identification complete', 'success');
+      announceAndVibrate('Identifikimi u krye', 'success');
     } catch (error: any) {
       console.error('[Currency] Error details:', {
         message: error?.message,
@@ -101,17 +101,17 @@ export default function CurrencyScreen() {
         cause: error?.cause,
       });
       
-      let errorMessage = 'Sorry, I could not identify the currency.';
+      let errorMessage = 'Na vjen keq, nuk mund të identifikoj valutën.';
       
       if (error?.message?.includes('Network request failed')) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
         console.error('[Currency] Network request failed - check internet connection');
       } else if (error?.message?.includes('Failed to capture image')) {
-        errorMessage = 'Camera error. Please try again.';
+        errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);
-      announceAndVibrate('Identification failed', 'error');
+      announceAndVibrate('Identifikimi dështoi', 'error');
       setLastResult(errorMessage);
     } finally {
       setIsIdentifying(false);
@@ -126,15 +126,15 @@ export default function CurrencyScreen() {
             <Pressable
               style={styles.closeButton}
               onPress={() => {
-                announceAndVibrate('Closing currency identifier', 'light');
+                announceAndVibrate('Duke mbyllur identifikuesin e valutës', 'light');
                 router.back();
               }}
-              accessibilityLabel="Close currency identifier"
+              accessibilityLabel="Mbyll identifikuesin e valutës"
               accessibilityRole="button"
             >
               <X size={32} color={Colors.white} strokeWidth={3} />
             </Pressable>
-            <Text style={styles.title}>Identify Currency</Text>
+            <Text style={styles.title}>Identifiko Valutë</Text>
           </View>
 
           {lastResult !== '' && (
@@ -148,19 +148,19 @@ export default function CurrencyScreen() {
               style={[styles.captureButton, isIdentifying && styles.captureButtonDisabled]}
               onPress={captureAndIdentify}
               disabled={isIdentifying}
-              accessibilityLabel={isIdentifying ? 'Identifying currency' : 'Capture and identify currency'}
+              accessibilityLabel={isIdentifying ? 'Duke identifikuar valutën' : 'Kapo dhe identifiko valutën'}
               accessibilityRole="button"
-              accessibilityHint="Takes a photo and identifies the currency"
+              accessibilityHint="Merr një fotografi dhe identifikon valutën"
             >
               {isIdentifying ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Identifying...</Text>
+                  <Text style={styles.captureButtonText}>Duke identifikuar...</Text>
                 </>
               ) : (
                 <>
                   <Camera size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Identify Currency</Text>
+                  <Text style={styles.captureButtonText}>Identifiko Valutë</Text>
                 </>
               )}
             </Pressable>

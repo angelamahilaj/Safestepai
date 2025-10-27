@@ -17,7 +17,7 @@ export default function TextReaderScreen() {
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    speak('Text reader activated. Point camera at text and tap read button.');
+    speak('Lexuesi i tekstit u aktivizua. Drejtoni kamerën drejt tekstit dhe prekni butonin lexo.');
     
     return () => {
       console.log('[TextReader] Cleaning up camera');
@@ -37,13 +37,13 @@ export default function TextReaderScreen() {
       <View style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
           <Text style={styles.permissionText}>
-            Camera access is needed to read text from documents and signs
+            Qasja në kamerë është e nevojshme për të lexuar tekst nga dokumentet dhe tabelat
           </Text>
           <Pressable style={styles.permissionButton} onPress={requestPermission}>
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text style={styles.permissionButtonText}>Jep Leje</Text>
           </Pressable>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.backButtonText}>Kthehu Prapa</Text>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -54,7 +54,7 @@ export default function TextReaderScreen() {
     if (!cameraRef.current || isReading) return;
 
     setIsReading(true);
-    announceAndVibrate('Reading text. Please wait.', 'medium');
+    announceAndVibrate('Duke lexuar tekstin. Ju lutem prisni.', 'medium');
 
     try {
       console.log('[TextReader] Starting image capture...');
@@ -92,7 +92,7 @@ export default function TextReaderScreen() {
       console.log('[TextReader] Text extracted successfully');
       setLastText(text);
       speak(text);
-      announceAndVibrate('Reading complete', 'success');
+      announceAndVibrate('Leximi u krye', 'success');
     } catch (error: any) {
       console.error('[TextReader] Error details:', {
         message: error?.message,
@@ -101,17 +101,17 @@ export default function TextReaderScreen() {
         cause: error?.cause,
       });
       
-      let errorMessage = 'Sorry, I could not read the text.';
+      let errorMessage = 'Na vjen keq, nuk mund të lexoj tekstin.';
       
       if (error?.message?.includes('Network request failed')) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
         console.error('[TextReader] Network request failed - check internet connection');
       } else if (error?.message?.includes('Failed to capture image')) {
-        errorMessage = 'Camera error. Please try again.';
+        errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);
-      announceAndVibrate('Reading failed', 'error');
+      announceAndVibrate('Leximi dështoi', 'error');
       setLastText(errorMessage);
     } finally {
       setIsReading(false);
@@ -126,15 +126,15 @@ export default function TextReaderScreen() {
             <Pressable
               style={styles.closeButton}
               onPress={() => {
-                announceAndVibrate('Closing text reader', 'light');
+                announceAndVibrate('Duke mbyllur lexuesin e tekstit', 'light');
                 router.back();
               }}
-              accessibilityLabel="Close text reader"
+              accessibilityLabel="Mbyll lexuesin e tekstit"
               accessibilityRole="button"
             >
               <X size={32} color={Colors.white} strokeWidth={3} />
             </Pressable>
-            <Text style={styles.title}>Read Text</Text>
+            <Text style={styles.title}>Lexo Tekst</Text>
           </View>
 
           {lastText !== '' && (
@@ -148,19 +148,19 @@ export default function TextReaderScreen() {
               style={[styles.captureButton, isReading && styles.captureButtonDisabled]}
               onPress={captureAndRead}
               disabled={isReading}
-              accessibilityLabel={isReading ? 'Reading text' : 'Capture and read text'}
+              accessibilityLabel={isReading ? 'Duke lexuar tekstin' : 'Kapo dhe lexo tekstin'}
               accessibilityRole="button"
-              accessibilityHint="Takes a photo and reads text aloud"
+              accessibilityHint="Merr një fotografi dhe lexon tekstin me zë të lartë"
             >
               {isReading ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Reading...</Text>
+                  <Text style={styles.captureButtonText}>Duke lexuar...</Text>
                 </>
               ) : (
                 <>
                   <Camera size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Read Text</Text>
+                  <Text style={styles.captureButtonText}>Lexo Tekst</Text>
                 </>
               )}
             </Pressable>

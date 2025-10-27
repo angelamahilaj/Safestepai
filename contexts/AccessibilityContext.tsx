@@ -48,12 +48,12 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
             utterance.rate = voiceSettings.rate;
             utterance.pitch = voiceSettings.pitch;
             utterance.volume = voiceSettings.volume;
-            utterance.lang = 'en-US';
+            utterance.lang = 'sq-AL';
             
             const voices = window.speechSynthesis.getVoices();
-            const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
-            if (englishVoice) {
-              utterance.voice = englishVoice;
+            const albanianVoice = voices.find(voice => voice.lang.startsWith('sq'));
+            if (albanianVoice) {
+              utterance.voice = albanianVoice;
             }
             
             utterance.onstart = () => {
@@ -84,7 +84,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
         try {
           console.log('[Voice] Using native speech');
           await Speech.speak(text, {
-            language: 'en-US',
+            language: 'sq-AL',
             rate: voiceSettings.rate,
             pitch: voiceSettings.pitch,
             volume: voiceSettings.volume,

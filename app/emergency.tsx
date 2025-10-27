@@ -13,40 +13,40 @@ export default function EmergencyScreen() {
   const { user } = useAuth();
 
   useEffect(() => {
-    speak('Emergency SOS. Select an option to get help immediately.');
+    speak('SOS Emergjence. Zgjidhni një opsion për të marrë ndihmë menjëherë.');
   }, [speak]);
 
   const call911 = () => {
-    announceAndVibrate('Calling 911 emergency services', 'warning');
+    announceAndVibrate('Duke thirrur 911 shërbimet e emergjencës', 'warning');
     Linking.openURL('tel:911');
   };
 
   const callLocalEmergency = () => {
-    announceAndVibrate('Calling 112 emergency services', 'warning');
+    announceAndVibrate('Duke thirrur 112 shërbimet e emergjencës', 'warning');
     Linking.openURL('tel:112');
   };
 
   const callEmergencyContact = () => {
     if (user?.medicalInfo?.emergencyContact?.phone) {
-      announceAndVibrate(`Calling ${user.medicalInfo.emergencyContact.name}`, 'warning');
+      announceAndVibrate(`Duke thirrur ${user.medicalInfo.emergencyContact.name}`, 'warning');
       Linking.openURL(`tel:${user.medicalInfo.emergencyContact.phone}`);
     } else {
-      announceAndVibrate('No emergency contact saved. Please add one in your profile.', 'error');
+      announceAndVibrate('Nuk ka kontakt emergjence të ruajtur. Ju lutem shtoni një në profilin tuaj.', 'error');
     }
   };
 
   const callDoctor = () => {
     if (user?.medicalInfo?.doctorContact?.phone) {
-      announceAndVibrate(`Calling doctor ${user.medicalInfo.doctorContact.name}`, 'warning');
+      announceAndVibrate(`Duke thirrur doktorin ${user.medicalInfo.doctorContact.name}`, 'warning');
       Linking.openURL(`tel:${user.medicalInfo.doctorContact.phone}`);
     } else {
-      announceAndVibrate('No doctor contact saved. Please add one in your profile.', 'error');
+      announceAndVibrate('Nuk ka kontakt doktori të ruajtur. Ju lutem shtoni një në profilin tuaj.', 'error');
     }
   };
 
   const sendEmergencyMessage = () => {
-    announceAndVibrate('Opening emergency message', 'warning');
-    const message = 'EMERGENCY! I need help. This is an automated message from SafeStepAI.';
+    announceAndVibrate('Duke hapur mesazhin e emergjencës', 'warning');
+    const message = 'EMERGJENCË! Kam nevojë për ndihmë. Ky është një mesazh i automatizuar nga SafeStepAI.';
     Linking.openURL(`sms:?body=${encodeURIComponent(message)}`);
   };
 
@@ -57,22 +57,22 @@ export default function EmergencyScreen() {
           <Pressable
             style={styles.closeButton}
             onPress={() => {
-              announceAndVibrate('Closing emergency screen', 'light');
+              announceAndVibrate('Duke mbyllur ekranin e emergjencës', 'light');
               router.back();
             }}
-            accessibilityLabel="Close emergency screen"
+            accessibilityLabel="Mbyll ekranin e emergjencës"
             accessibilityRole="button"
           >
             <X size={28} color={Colors.white} strokeWidth={3} />
           </Pressable>
-          <Text style={styles.title}>EMERGENCY SOS</Text>
+          <Text style={styles.title}>SOS EMERGJENCË</Text>
         </View>
 
         <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
           <View style={styles.warningBox}>
             <Shield size={48} color={Colors.red} strokeWidth={2.5} />
             <Text style={styles.warningText}>
-              Use these options only in case of real emergency
+              Përdorni këto opsione vetëm në rast të emergjencës reale
             </Text>
           </View>
 
@@ -80,48 +80,48 @@ export default function EmergencyScreen() {
             <Pressable
               style={styles.emergencyButton}
               onPress={call911}
-              accessibilityLabel="Call 911 emergency services"
+              accessibilityLabel="Thirr 911 shërbimet e emergjencës"
               accessibilityRole="button"
-              accessibilityHint="Calls 911 for immediate emergency assistance"
+              accessibilityHint="Thirr 911 për ndihmë emergjente menjëherë"
             >
               <Phone size={56} color={Colors.white} strokeWidth={2.5} />
-              <Text style={styles.emergencyButtonText}>Call 911</Text>
-              <Text style={styles.emergencyButtonSubtext}>Emergency Services</Text>
+              <Text style={styles.emergencyButtonText}>Thirr 911</Text>
+              <Text style={styles.emergencyButtonSubtext}>Shërbime Emergjence</Text>
             </Pressable>
 
             <Pressable
               style={styles.emergencyButton}
               onPress={callLocalEmergency}
-              accessibilityLabel="Call 112 emergency services"
+              accessibilityLabel="Thirr 112 shërbimet e emergjencës"
               accessibilityRole="button"
-              accessibilityHint="Calls 112 for immediate emergency assistance"
+              accessibilityHint="Thirr 112 për ndihmë emergjente menjëherë"
             >
               <Phone size={56} color={Colors.white} strokeWidth={2.5} />
-              <Text style={styles.emergencyButtonText}>Call 112</Text>
-              <Text style={styles.emergencyButtonSubtext}>International Emergency</Text>
+              <Text style={styles.emergencyButtonText}>Thirr 112</Text>
+              <Text style={styles.emergencyButtonSubtext}>Emergjencë Ndërkombëtare</Text>
             </Pressable>
 
             <Pressable
               style={styles.secondaryButton}
               onPress={sendEmergencyMessage}
-              accessibilityLabel="Send emergency text message"
+              accessibilityLabel="Dërgo mesazh emergjence"
               accessibilityRole="button"
-              accessibilityHint="Opens SMS to send emergency message to contacts"
+              accessibilityHint="Hap SMS për të dërguar mesazh emergjence te kontaktet"
             >
               <Users size={40} color={Colors.white} strokeWidth={2.5} />
-              <Text style={styles.secondaryButtonText}>Send Emergency SMS</Text>
+              <Text style={styles.secondaryButtonText}>Dërgo SMS Emergjence</Text>
             </Pressable>
           </View>
 
           {(user?.medicalInfo?.emergencyContact || user?.medicalInfo?.doctorContact) && (
             <View style={styles.personalContactsSection}>
-              <Text style={styles.sectionTitle}>Personal Contacts</Text>
+              <Text style={styles.sectionTitle}>Kontakte Personale</Text>
               
               {user?.medicalInfo?.emergencyContact && (
                 <Pressable
                   style={styles.contactButton}
                   onPress={callEmergencyContact}
-                  accessibilityLabel={`Call emergency contact ${user.medicalInfo.emergencyContact.name}`}
+                  accessibilityLabel={`Thirr kontaktin e emergjencës ${user.medicalInfo.emergencyContact.name}`}
                   accessibilityRole="button"
                 >
                   <Users size={40} color={Colors.white} strokeWidth={2.5} />
@@ -137,7 +137,7 @@ export default function EmergencyScreen() {
                 <Pressable
                   style={styles.contactButton}
                   onPress={callDoctor}
-                  accessibilityLabel={`Call doctor ${user.medicalInfo.doctorContact.name}`}
+                  accessibilityLabel={`Thirr doktorin ${user.medicalInfo.doctorContact.name}`}
                   accessibilityRole="button"
                 >
                   <Heart size={40} color={Colors.white} strokeWidth={2.5} />
@@ -153,7 +153,7 @@ export default function EmergencyScreen() {
 
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              Your location will be shared when you make an emergency call
+              Vendndodhja juaj do të ndahet kur të bëni një telefonatë emergjence
             </Text>
           </View>
         </ScrollView>

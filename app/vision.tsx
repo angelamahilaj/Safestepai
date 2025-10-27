@@ -17,7 +17,7 @@ export default function VisionScreen() {
   const cameraRef = useRef<CameraView>(null);
 
   useEffect(() => {
-    speak('Camera activated. Point at something and tap analyze scene button.');
+    speak('Kamera e aktivizuar. Drejtojeni drejt diçkaje dhe prekni butonin analizo skenën.');
     
     return () => {
       console.log('[Vision] Cleaning up camera');
@@ -37,13 +37,13 @@ export default function VisionScreen() {
       <View style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
           <Text style={styles.permissionText}>
-            Camera access is needed to describe your surroundings
+            Qasja në kamerë është e nevojshme për të përshkruar rrethinën tuaj
           </Text>
           <Pressable style={styles.permissionButton} onPress={requestPermission}>
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text style={styles.permissionButtonText}>Jep Leje</Text>
           </Pressable>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.backButtonText}>Kthehu Prapa</Text>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -54,7 +54,7 @@ export default function VisionScreen() {
     if (!cameraRef.current || isAnalyzing) return;
 
     setIsAnalyzing(true);
-    announceAndVibrate('Analyzing scene. Please wait.', 'medium');
+    announceAndVibrate('Duke analizuar skenën. Ju lutem prisni.', 'medium');
 
     try {
       console.log('[Vision] Starting image capture...');
@@ -92,7 +92,7 @@ export default function VisionScreen() {
       console.log('[Vision] Description received successfully');
       setLastDescription(description);
       speak(description);
-      announceAndVibrate('Analysis complete', 'success');
+      announceAndVibrate('Analiza u krye', 'success');
     } catch (error: any) {
       console.error('[Vision] Error details:', {
         message: error?.message,
@@ -101,20 +101,20 @@ export default function VisionScreen() {
         cause: error?.cause,
       });
       
-      let errorMessage = 'Sorry, I could not analyze the scene.';
+      let errorMessage = 'Na vjen keq, nuk mund të analizoj skenën.';
       
       if (error?.message?.includes('Network request failed')) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
         console.error('[Vision] Network request failed - possible causes:');
         console.error('  - No internet connection');
         console.error('  - EXPO_PUBLIC_TOOLKIT_URL not configured');
         console.error('  - API endpoint unreachable');
       } else if (error?.message?.includes('Failed to capture image')) {
-        errorMessage = 'Camera error. Please try again.';
+        errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);
-      announceAndVibrate('Analysis failed', 'error');
+      announceAndVibrate('Analiza dështoi', 'error');
       setLastDescription(errorMessage);
     } finally {
       setIsAnalyzing(false);
@@ -129,15 +129,15 @@ export default function VisionScreen() {
             <Pressable
               style={styles.closeButton}
               onPress={() => {
-                announceAndVibrate('Closing camera', 'light');
+                announceAndVibrate('Duke mbyllur kamerën', 'light');
                 router.back();
               }}
-              accessibilityLabel="Close camera"
+              accessibilityLabel="Mbyll kamerën"
               accessibilityRole="button"
             >
               <X size={32} color={Colors.white} strokeWidth={3} />
             </Pressable>
-            <Text style={styles.title}>What Do You See?</Text>
+            <Text style={styles.title}>Çfarë Sheh?</Text>
           </View>
 
           {lastDescription !== '' && (
@@ -151,19 +151,19 @@ export default function VisionScreen() {
               style={[styles.captureButton, isAnalyzing && styles.captureButtonDisabled]}
               onPress={captureAndAnalyze}
               disabled={isAnalyzing}
-              accessibilityLabel={isAnalyzing ? 'Analyzing scene' : 'Capture and analyze scene'}
+              accessibilityLabel={isAnalyzing ? 'Duke analizuar skenën' : 'Kapo dhe analizo skenën'}
               accessibilityRole="button"
-              accessibilityHint="Takes a photo and describes what the camera sees"
+              accessibilityHint="Merr një fotografi dhe përshkruan atë që shikon kamera"
             >
               {isAnalyzing ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Analyzing...</Text>
+                  <Text style={styles.captureButtonText}>Duke analizuar...</Text>
                 </>
               ) : (
                 <>
                   <Camera size={40} color={Colors.white} />
-                  <Text style={styles.captureButtonText}>Analyze Scene</Text>
+                  <Text style={styles.captureButtonText}>Analizo Skenën</Text>
                 </>
               )}
             </Pressable>

@@ -28,7 +28,7 @@ export default function MedicalInfoScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak('Medical information editor. Fill in your medical details. All fields are optional but recommended for emergencies.');
+      speak('Redaktuesi i informacionit mjekësor. Plotësoni detajet tuaja mjekësore. Të gjitha fushat janë opsionale por të rekomanduara për emergjenca.');
     }, 500);
     
     return () => clearTimeout(timer);
@@ -57,35 +57,35 @@ export default function MedicalInfoScreen() {
     if (newAllergy.trim()) {
       setAllergies([...allergies, newAllergy.trim()]);
       setNewAllergy('');
-      announceAndVibrate(`Added allergy: ${newAllergy}`, 'success');
+      announceAndVibrate(`U shtua alergjia: ${newAllergy}`, 'success');
     }
   };
 
   const removeAllergy = (index: number) => {
     const removed = allergies[index];
     setAllergies(allergies.filter((_, i) => i !== index));
-    announceAndVibrate(`Removed allergy: ${removed}`, 'light');
+    announceAndVibrate(`U hoq alergjia: ${removed}`, 'light');
   };
 
   const addCondition = () => {
     if (newCondition.trim()) {
       setConditions([...conditions, newCondition.trim()]);
       setNewCondition('');
-      announceAndVibrate(`Added condition: ${newCondition}`, 'success');
+      announceAndVibrate(`U shtua gjendja: ${newCondition}`, 'success');
     }
   };
 
   const removeCondition = (index: number) => {
     const removed = conditions[index];
     setConditions(conditions.filter((_, i) => i !== index));
-    announceAndVibrate(`Removed condition: ${removed}`, 'light');
+    announceAndVibrate(`U hoq gjendja: ${removed}`, 'light');
   };
 
   const handleSave = async () => {
     if (isSaving) return;
 
     setIsSaving(true);
-    announceAndVibrate('Saving medical information', 'medium');
+    announceAndVibrate('Duke ruajtur informacionin mjekësor', 'medium');
 
     const medicalInfo: MedicalInfo = {
       bloodType: bloodType.trim() || undefined,
@@ -110,12 +110,12 @@ export default function MedicalInfoScreen() {
     const result = await updateMedicalInfo(medicalInfo);
 
     if (result.success) {
-      announceAndVibrate('Medical information saved successfully', 'success');
+      announceAndVibrate('Informacioni mjekësor u ruajt me sukses', 'success');
       setTimeout(() => {
         router.back();
       }, 1000);
     } else {
-      announceAndVibrate('Failed to save medical information', 'error');
+      announceAndVibrate('Dështoi ruajtja e informacionit mjekësor', 'error');
     }
 
     setIsSaving(false);
@@ -135,43 +135,43 @@ export default function MedicalInfoScreen() {
           >
             <View style={styles.header}>
               <Heart size={48} color={Colors.white} />
-              <Text style={styles.title}>Medical Information</Text>
+              <Text style={styles.title}>Informacioni Mjekësor</Text>
               <Text style={styles.subtitle}>
-                This information is stored securely on your device and can be accessed in emergencies
+                Ky informacion ruhet në mënyrë të sigurt në pajisjen tuaj dhe mund të aksesohet në emergjenca
               </Text>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Blood Type</Text>
+              <Text style={styles.sectionTitle}>Grupi i Gjakut</Text>
               <TextInput
                 style={styles.input}
-                placeholder="e.g., A+, O-, AB+"
+                placeholder="p.sh., A+, O-, AB+"
                 placeholderTextColor={Colors.lightGray}
                 value={bloodType}
                 onChangeText={setBloodType}
-                accessibilityLabel="Blood type input"
-                onFocus={() => speak('Blood type field. Enter your blood type, for example A plus or O negative.')}
+                accessibilityLabel="Fusha e grupit të gjakut"
+                onFocus={() => speak('Fusha e grupit të gjakut. Vendosni grupin tuaj të gjakut, për shembull A plus ose O negativ.')}
                 autoCapitalize="characters"
               />
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Allergies</Text>
+              <Text style={styles.sectionTitle}>Alergjitë</Text>
               <View style={styles.addItemContainer}>
                 <TextInput
                   style={[styles.input, styles.addItemInput]}
-                  placeholder="Add allergy"
+                  placeholder="Shto alergji"
                   placeholderTextColor={Colors.lightGray}
                   value={newAllergy}
                   onChangeText={setNewAllergy}
-                  accessibilityLabel="New allergy input"
-                  onFocus={() => speak('Add allergy field')}
+                  accessibilityLabel="Fusha e alergjisë së re"
+                  onFocus={() => speak('Fusha shto alergji')}
                   onSubmitEditing={addAllergy}
                 />
                 <Pressable
                   style={styles.addButton}
                   onPress={addAllergy}
-                  accessibilityLabel="Add allergy button"
+                  accessibilityLabel="Butoni shto alergji"
                 >
                   <Plus size={24} color={Colors.white} />
                 </Pressable>
@@ -181,7 +181,7 @@ export default function MedicalInfoScreen() {
                   <Text style={styles.listItemText}>{allergy}</Text>
                   <Pressable
                     onPress={() => removeAllergy(index)}
-                    accessibilityLabel={`Remove ${allergy}`}
+                    accessibilityLabel={`Hiq ${allergy}`}
                     style={styles.removeButton}
                   >
                     <X size={20} color={Colors.white} />
@@ -191,22 +191,22 @@ export default function MedicalInfoScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Medical Conditions</Text>
+              <Text style={styles.sectionTitle}>Gjendjet Mjekësore</Text>
               <View style={styles.addItemContainer}>
                 <TextInput
                   style={[styles.input, styles.addItemInput]}
-                  placeholder="Add condition"
+                  placeholder="Shto gjendje"
                   placeholderTextColor={Colors.lightGray}
                   value={newCondition}
                   onChangeText={setNewCondition}
-                  accessibilityLabel="New condition input"
-                  onFocus={() => speak('Add medical condition field')}
+                  accessibilityLabel="Fusha e gjendjes së re"
+                  onFocus={() => speak('Fusha shto gjendje mjekësore')}
                   onSubmitEditing={addCondition}
                 />
                 <Pressable
                   style={styles.addButton}
                   onPress={addCondition}
-                  accessibilityLabel="Add condition button"
+                  accessibilityLabel="Butoni shto gjendje"
                 >
                   <Plus size={24} color={Colors.white} />
                 </Pressable>
@@ -216,7 +216,7 @@ export default function MedicalInfoScreen() {
                   <Text style={styles.listItemText}>{condition}</Text>
                   <Pressable
                     onPress={() => removeCondition(index)}
-                    accessibilityLabel={`Remove ${condition}`}
+                    accessibilityLabel={`Hiq ${condition}`}
                     style={styles.removeButton}
                   >
                     <X size={20} color={Colors.white} />
@@ -226,84 +226,84 @@ export default function MedicalInfoScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Emergency Contact</Text>
+              <Text style={styles.sectionTitle}>Kontakti i Emergjencës</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Name"
+                placeholder="Emri"
                 placeholderTextColor={Colors.lightGray}
                 value={emergencyName}
                 onChangeText={setEmergencyName}
-                accessibilityLabel="Emergency contact name"
-                onFocus={() => speak('Emergency contact name field')}
+                accessibilityLabel="Emri i kontaktit të emergjencës"
+                onFocus={() => speak('Fusha e emrit të kontaktit të emergjencës')}
               />
               <TextInput
                 style={styles.input}
-                placeholder="Phone Number"
+                placeholder="Numri i Telefonit"
                 placeholderTextColor={Colors.lightGray}
                 value={emergencyPhone}
                 onChangeText={setEmergencyPhone}
-                accessibilityLabel="Emergency contact phone"
-                onFocus={() => speak('Emergency contact phone number field')}
+                accessibilityLabel="Telefoni i kontaktit të emergjencës"
+                onFocus={() => speak('Fusha e numrit të telefonit të kontaktit të emergjencës')}
                 keyboardType="phone-pad"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Relationship (e.g., Mother, Spouse)"
+                placeholder="Lidhja (p.sh., Nënë, Bashkëshort/e)"
                 placeholderTextColor={Colors.lightGray}
                 value={emergencyRelation}
                 onChangeText={setEmergencyRelation}
-                accessibilityLabel="Emergency contact relationship"
-                onFocus={() => speak('Emergency contact relationship field')}
+                accessibilityLabel="Lidhja e kontaktit të emergjencës"
+                onFocus={() => speak('Fusha e lidhjes së kontaktit të emergjencës')}
               />
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Doctor Information</Text>
+              <Text style={styles.sectionTitle}>Informacioni i Doktorit</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Doctor Name"
+                placeholder="Emri i Doktorit"
                 placeholderTextColor={Colors.lightGray}
                 value={doctorName}
                 onChangeText={setDoctorName}
-                accessibilityLabel="Doctor name"
-                onFocus={() => speak('Doctor name field')}
+                accessibilityLabel="Emri i doktorit"
+                onFocus={() => speak('Fusha e emrit të doktorit')}
               />
               <TextInput
                 style={styles.input}
-                placeholder="Doctor Phone"
+                placeholder="Telefoni i Doktorit"
                 placeholderTextColor={Colors.lightGray}
                 value={doctorPhone}
                 onChangeText={setDoctorPhone}
-                accessibilityLabel="Doctor phone"
-                onFocus={() => speak('Doctor phone number field')}
+                accessibilityLabel="Telefoni i doktorit"
+                onFocus={() => speak('Fusha e numrit të telefonit të doktorit')}
                 keyboardType="phone-pad"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Specialty"
+                placeholder="Specialiteti"
                 placeholderTextColor={Colors.lightGray}
                 value={doctorSpecialty}
                 onChangeText={setDoctorSpecialty}
-                accessibilityLabel="Doctor specialty"
-                onFocus={() => speak('Doctor specialty field')}
+                accessibilityLabel="Specialiteti i doktorit"
+                onFocus={() => speak('Fusha e specialitetit të doktorit')}
               />
             </View>
 
             <AccessibleButton
-              title={isSaving ? 'Saving...' : 'Save Medical Information'}
+              title={isSaving ? 'Duke Ruajtur...' : 'Ruaj Informacionin Mjekësor'}
               icon={<Save size={24} color={Colors.white} />}
               onPress={handleSave}
               disabled={isSaving}
-              accessibilityLabel="Save medical information button"
-              accessibilityHint="Saves all your medical information securely"
+              accessibilityLabel="Butoni ruaj informacionin mjekësor"
+              accessibilityHint="Ruan të gjithë informacionin tuaj mjekësor në mënyrë të sigurt"
             />
 
             <Pressable
               onPress={() => router.back()}
-              accessibilityLabel="Cancel and go back"
+              accessibilityLabel="Anulo dhe kthehu mbrapa"
               style={styles.cancelButton}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>Anulo</Text>
             </Pressable>
           </ScrollView>
         </KeyboardAvoidingView>

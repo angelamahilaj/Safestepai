@@ -20,7 +20,7 @@ export default function EditProfileScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak('Edit profile screen. Update your personal information.');
+      speak('Ekrani i redaktimit të profilit. Përditësoni informacionin tuaj personal.');
     }, 500);
     
     return () => clearTimeout(timer);
@@ -38,17 +38,17 @@ export default function EditProfileScreen() {
     if (isSaving) return;
 
     if (!name.trim()) {
-      announceAndVibrate('Please enter your name', 'error');
+      announceAndVibrate('Ju lutem vendosni emrin tuaj', 'error');
       return;
     }
 
     if (!email.trim()) {
-      announceAndVibrate('Please enter your email', 'error');
+      announceAndVibrate('Ju lutem vendosni emailin tuaj', 'error');
       return;
     }
 
     setIsSaving(true);
-    announceAndVibrate('Saving profile', 'medium');
+    announceAndVibrate('Duke ruajtur profilin', 'medium');
 
     const result = await updateProfile({
       name: name.trim(),
@@ -57,12 +57,12 @@ export default function EditProfileScreen() {
     });
 
     if (result.success) {
-      announceAndVibrate('Profile updated successfully', 'success');
+      announceAndVibrate('Profili u përditësua me sukses', 'success');
       setTimeout(() => {
         router.back();
       }, 1000);
     } else {
-      announceAndVibrate('Failed to update profile', 'error');
+      announceAndVibrate('Dështoi përditësimi i profilit', 'error');
     }
 
     setIsSaving(false);
@@ -82,45 +82,45 @@ export default function EditProfileScreen() {
           >
             <View style={styles.header}>
               <UserIcon size={48} color={Colors.white} />
-              <Text style={styles.title}>Edit Profile</Text>
+              <Text style={styles.title}>Ndrysho Profilin</Text>
               <Text style={styles.subtitle}>
-                Update your personal information
+                Përditëso informacionin tuaj personal
               </Text>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Name</Text>
+              <Text style={styles.label}>Emri</Text>
               <View style={styles.inputGroup}>
                 <View style={styles.inputIconContainer}>
                   <UserIcon size={24} color={Colors.blue} />
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="Your Name"
+                  placeholder="Emri Juaj"
                   placeholderTextColor={Colors.lightGray}
                   value={name}
                   onChangeText={setName}
-                  accessibilityLabel="Name input"
-                  onFocus={() => speak('Name field. Enter your full name.')}
+                  accessibilityLabel="Fusha e emrit"
+                  onFocus={() => speak('Fusha e emrit. Vendosni emrin tuaj të plotë.')}
                   autoCapitalize="words"
                 />
               </View>
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email-i</Text>
               <View style={styles.inputGroup}>
                 <View style={styles.inputIconContainer}>
                   <Mail size={24} color={Colors.blue} />
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="Email Address"
+                  placeholder="Adresa e Emailit"
                   placeholderTextColor={Colors.lightGray}
                   value={email}
                   onChangeText={setEmail}
-                  accessibilityLabel="Email input"
-                  onFocus={() => speak('Email field. Enter your email address.')}
+                  accessibilityLabel="Fusha e emailit"
+                  onFocus={() => speak('Fusha e emailit. Vendosni adresën tuaj të emailit.')}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
@@ -128,39 +128,39 @@ export default function EditProfileScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.label}>Phone (Optional)</Text>
+              <Text style={styles.label}>Telefoni (Opsional)</Text>
               <View style={styles.inputGroup}>
                 <View style={styles.inputIconContainer}>
                   <Phone size={24} color={Colors.blue} />
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="Phone Number"
+                  placeholder="Numri i Telefonit"
                   placeholderTextColor={Colors.lightGray}
                   value={phone}
                   onChangeText={setPhone}
-                  accessibilityLabel="Phone number input"
-                  onFocus={() => speak('Phone number field. This is optional.')}
+                  accessibilityLabel="Fusha e numrit të telefonit"
+                  onFocus={() => speak('Fusha e numrit të telefonit. Kjo është opsionale.')}
                   keyboardType="phone-pad"
                 />
               </View>
             </View>
 
             <AccessibleButton
-              title={isSaving ? 'Saving...' : 'Save Changes'}
+              title={isSaving ? 'Duke Ruajtur...' : 'Ruaj Ndryshimet'}
               icon={<Save size={24} color={Colors.white} />}
               onPress={handleSave}
               disabled={isSaving}
-              accessibilityLabel="Save changes button"
-              accessibilityHint="Saves your updated profile information"
+              accessibilityLabel="Butoni ruaj ndryshimet"
+              accessibilityHint="Ruan informacionin tuaj të përditësuar të profilit"
             />
 
             <Pressable
               onPress={() => router.back()}
-              accessibilityLabel="Cancel and go back"
+              accessibilityLabel="Anulo dhe kthehu mbrapa"
               style={styles.cancelButton}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>Anulo</Text>
             </Pressable>
           </ScrollView>
         </KeyboardAvoidingView>

@@ -22,7 +22,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (user) {
-        speak(`Profile screen. Welcome ${user.name}. Here you can view and edit your personal and medical information.`);
+        speak(`Ekrani i profilit. Mirë se erdhe ${user.name}. Këtu mund të shikoni dhe redaktoni informacionin tuaj personal dhe mjekësor.`);
       }
     }, 500);
     
@@ -30,13 +30,13 @@ export default function ProfileScreen() {
   }, [user, speak]);
 
   const handleSignOut = async () => {
-    announceAndVibrate('Signing out', 'medium');
+    announceAndVibrate('Duke dalë', 'medium');
     const result = await signOut();
     if (result.success) {
-      announceAndVibrate('Signed out successfully', 'success');
+      announceAndVibrate('Dolët me sukses', 'success');
       router.replace('/auth');
     } else {
-      announceAndVibrate('Failed to sign out', 'error');
+      announceAndVibrate('Dështoi dalja', 'error');
     }
   };
 
@@ -59,12 +59,12 @@ export default function ProfileScreen() {
             </View>
             <Text style={styles.name}>{user.name}</Text>
             <Text style={styles.memberSince}>
-              Member since {new Date(user.createdAt).toLocaleDateString()}
+              Anëtar që nga {new Date(user.createdAt).toLocaleDateString()}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Personal Information</Text>
+            <Text style={styles.sectionTitle}>Informacioni Personal</Text>
             
             <View style={styles.infoCard}>
               <View style={styles.infoRow}>
@@ -72,7 +72,7 @@ export default function ProfileScreen() {
                   <Mail size={24} color={Colors.blue} />
                 </View>
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Email</Text>
+                  <Text style={styles.infoLabel}>Email-i</Text>
                   <Text style={styles.infoValue}>{user.email}</Text>
                 </View>
               </View>
@@ -83,7 +83,7 @@ export default function ProfileScreen() {
                     <Phone size={24} color={Colors.blue} />
                   </View>
                   <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>Phone</Text>
+                    <Text style={styles.infoLabel}>Telefoni</Text>
                     <Text style={styles.infoValue}>{user.phone}</Text>
                   </View>
                 </View>
@@ -91,47 +91,47 @@ export default function ProfileScreen() {
             </View>
 
             <AccessibleButton
-              title="Edit Personal Info"
+              title="Ndrysho Informacionin Personal"
               icon={<Edit size={24} color={Colors.white} />}
               onPress={() => {
-                announceAndVibrate('Opening edit profile', 'light');
+                announceAndVibrate('Duke hapur redaktimin e profilit', 'light');
                 router.push('/edit-profile');
               }}
               variant="secondary"
-              accessibilityLabel="Edit personal information button"
-              accessibilityHint="Opens screen to edit your name, email, and phone number"
+              accessibilityLabel="Butoni ndrysho informacionin personal"
+              accessibilityHint="Hap ekranin për të ndryshuar emrin, emailin dhe numrin e telefonit tuaj"
             />
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Medical Information</Text>
+            <Text style={styles.sectionTitle}>Informacioni Mjekësor</Text>
             
             {medicalInfo ? (
               <View style={styles.infoCard}>
                 {medicalInfo.bloodType && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Blood Type</Text>
+                    <Text style={styles.medicalLabel}>Grupi i Gjakut</Text>
                     <Text style={styles.medicalValue}>{medicalInfo.bloodType}</Text>
                   </View>
                 )}
 
                 {medicalInfo.allergies && medicalInfo.allergies.length > 0 && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Allergies</Text>
+                    <Text style={styles.medicalLabel}>Alergjitë</Text>
                     <Text style={styles.medicalValue}>{medicalInfo.allergies.join(', ')}</Text>
                   </View>
                 )}
 
                 {medicalInfo.conditions && medicalInfo.conditions.length > 0 && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Medical Conditions</Text>
+                    <Text style={styles.medicalLabel}>Gjendjet Mjekësore</Text>
                     <Text style={styles.medicalValue}>{medicalInfo.conditions.join(', ')}</Text>
                   </View>
                 )}
 
                 {medicalInfo.medications && medicalInfo.medications.length > 0 && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Medications</Text>
+                    <Text style={styles.medicalLabel}>Ilaçet</Text>
                     {medicalInfo.medications.map((med, index) => (
                       <Text key={index} style={styles.medicationItem}>
                         • {med.name} - {med.dosage}, {med.frequency}
@@ -142,7 +142,7 @@ export default function ProfileScreen() {
 
                 {medicalInfo.emergencyContact && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Emergency Contact</Text>
+                    <Text style={styles.medicalLabel}>Kontakti i Emergjencës</Text>
                     <Text style={styles.medicalValue}>
                       {medicalInfo.emergencyContact.name} ({medicalInfo.emergencyContact.relationship})
                     </Text>
@@ -154,7 +154,7 @@ export default function ProfileScreen() {
 
                 {medicalInfo.doctorContact && (
                   <View style={styles.medicalItem}>
-                    <Text style={styles.medicalLabel}>Doctor</Text>
+                    <Text style={styles.medicalLabel}>Doktori</Text>
                     <Text style={styles.medicalValue}>
                       {medicalInfo.doctorContact.name} - {medicalInfo.doctorContact.specialty}
                     </Text>
@@ -167,30 +167,30 @@ export default function ProfileScreen() {
             ) : (
               <View style={styles.emptyCard}>
                 <AlertCircle size={48} color={Colors.lightGray} />
-                <Text style={styles.emptyText}>No medical information added yet</Text>
+                <Text style={styles.emptyText}>Nuk ka informacion mjekësor të shtuar ende</Text>
               </View>
             )}
 
             <AccessibleButton
-              title={medicalInfo ? "Edit Medical Info" : "Add Medical Info"}
+              title={medicalInfo ? "Ndrysho Informacionin Mjekësor" : "Shto Informacion Mjekësor"}
               icon={<Heart size={24} color={Colors.white} />}
               onPress={() => {
-                announceAndVibrate('Opening medical information editor', 'light');
+                announceAndVibrate('Duke hapur redaktuesin e informacionit mjekësor', 'light');
                 router.push('/medical-info');
               }}
-              accessibilityLabel={medicalInfo ? "Edit medical information button" : "Add medical information button"}
-              accessibilityHint="Opens screen to manage your medical information, including allergies, medications, and emergency contacts"
+              accessibilityLabel={medicalInfo ? "Butoni ndrysho informacionin mjekësor" : "Butoni shto informacion mjekësor"}
+              accessibilityHint="Hap ekranin për të menaxhuar informacionin tuaj mjekësor, duke përfshirë alergji, ilaçe dhe kontakte emergjente"
             />
           </View>
 
           <View style={styles.section}>
             <AccessibleButton
-              title="Sign Out"
+              title="Dil"
               icon={<LogOut size={24} color={Colors.white} />}
               onPress={handleSignOut}
               variant="emergency"
-              accessibilityLabel="Sign out button"
-              accessibilityHint="Signs you out of your SafeStepAI account"
+              accessibilityLabel="Butoni dil"
+              accessibilityHint="Të nxjerr nga llogaria jote SafeStepAI"
             />
           </View>
         </ScrollView>

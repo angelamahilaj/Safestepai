@@ -28,8 +28,8 @@ export default function AuthScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       speak(isSignUp 
-        ? 'Welcome to Safe Step A I. Create your account to get started. You can use voice commands to fill in your information.'
-        : 'Welcome back to Safe Step A I. Please sign in to continue.'
+        ? 'Mirë se erdhe në Safe Step A I. Krijo llogarinë tënde për të filluar. Mund të përdorësh komanda me zë për të plotësuar informacionin tënd.'
+        : 'Mirë se u ktheve në Safe Step A I. Ju lutem identifikohu për të vazhduar.'
       );
     }, 500);
     
@@ -40,17 +40,17 @@ export default function AuthScreen() {
     if (isProcessing) return;
 
     if (!email.trim()) {
-      announceAndVibrate('Please enter your email address', 'error');
+      announceAndVibrate('Ju lutem vendosni adresën tuaj të emailit', 'error');
       return;
     }
 
     if (isSignUp && !name.trim()) {
-      announceAndVibrate('Please enter your name', 'error');
+      announceAndVibrate('Ju lutem vendosni emrin tuaj', 'error');
       return;
     }
 
     setIsProcessing(true);
-    announceAndVibrate('Processing your request', 'medium');
+    announceAndVibrate('Duke përpunuar kërkesën tuaj', 'medium');
 
     try {
       const result = isSignUp 
@@ -60,19 +60,19 @@ export default function AuthScreen() {
       if (result.success) {
         announceAndVibrate(
           isSignUp 
-            ? `Welcome ${name}! Your account has been created successfully.`
-            : `Welcome back! Signed in successfully.`,
+            ? `Mirë se erdhe ${name}! Llogaria juaj u krijua me sukses.`
+            : `Mirë se u ktheve! U identifikove me sukses.`,
           'success'
         );
         setTimeout(() => {
           router.replace('/');
         }, 1000);
       } else {
-        announceAndVibrate(result.error || 'Authentication failed', 'error');
+        announceAndVibrate(result.error || 'Identifikimi dështoi', 'error');
       }
     } catch (error) {
       console.error('[Auth] Error:', error);
-      announceAndVibrate('An error occurred. Please try again.', 'error');
+      announceAndVibrate('Ndodhi një gabim. Ju lutem provoni përsëri.', 'error');
     } finally {
       setIsProcessing(false);
     }
@@ -81,7 +81,7 @@ export default function AuthScreen() {
   const toggleMode = () => {
     setIsSignUp(!isSignUp);
     announceAndVibrate(
-      isSignUp ? 'Switched to sign in mode' : 'Switched to sign up mode',
+      isSignUp ? 'U ndryshue në mënyrën e identifikimit' : 'U ndryshue në mënyrën e krijimit të llogarisë',
       'light'
     );
   };
@@ -101,7 +101,7 @@ export default function AuthScreen() {
             <View style={styles.header}>
               <Text style={styles.logo}>SafeStepAI</Text>
               <Text style={styles.subtitle}>
-                {isSignUp ? 'Create Your Account' : 'Welcome Back'}
+                {isSignUp ? 'Krijo Llogarinë Tënde' : 'Mirë se u ktheve'}
               </Text>
             </View>
 
@@ -110,7 +110,7 @@ export default function AuthScreen() {
                 <Mic size={32} color={Colors.white} />
               </View>
               <Text style={styles.voiceText}>
-                Voice commands available. Say &quot;help&quot; for assistance.
+                Komandat me zë janë në dispozicion. Thuaj &quot;ndihmë&quot; për asistencë.
               </Text>
             </View>
 
@@ -122,13 +122,13 @@ export default function AuthScreen() {
                   </View>
                   <TextInput
                     style={styles.input}
-                    placeholder="Your Name"
+                    placeholder="Emri Juaj"
                     placeholderTextColor={Colors.lightGray}
                     value={name}
                     onChangeText={setName}
-                    accessibilityLabel="Name input"
-                    accessibilityHint="Enter your full name"
-                    onFocus={() => speak('Name field. Enter your full name.')}
+                    accessibilityLabel="Fusha e emrit"
+                    accessibilityHint="Vendosni emrin tuaj të plotë"
+                    onFocus={() => speak('Fusha e emrit. Vendosni emrin tuaj të plotë.')}
                     autoCapitalize="words"
                   />
                 </View>
@@ -140,13 +140,13 @@ export default function AuthScreen() {
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="Email Address"
+                  placeholder="Adresa e Emailit"
                   placeholderTextColor={Colors.lightGray}
                   value={email}
                   onChangeText={setEmail}
-                  accessibilityLabel="Email input"
-                  accessibilityHint="Enter your email address"
-                  onFocus={() => speak('Email field. Enter your email address.')}
+                  accessibilityLabel="Fusha e emailit"
+                  accessibilityHint="Vendosni adresën tuaj të emailit"
+                  onFocus={() => speak('Fusha e emailit. Vendosni adresën tuaj të emailit.')}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -160,13 +160,13 @@ export default function AuthScreen() {
                   </View>
                   <TextInput
                     style={styles.input}
-                    placeholder="Phone Number (Optional)"
+                    placeholder="Numri i Telefonit (Opsionale)"
                     placeholderTextColor={Colors.lightGray}
                     value={phone}
                     onChangeText={setPhone}
-                    accessibilityLabel="Phone number input"
-                    accessibilityHint="Enter your phone number, optional"
-                    onFocus={() => speak('Phone number field. This is optional.')}
+                    accessibilityLabel="Fusha e numrit të telefonit"
+                    accessibilityHint="Vendosni numrin tuaj të telefonit, opsionale"
+                    onFocus={() => speak('Fusha e numrit të telefonit. Kjo është opsionale.')}
                     keyboardType="phone-pad"
                     autoComplete="tel"
                   />
@@ -175,40 +175,40 @@ export default function AuthScreen() {
 
               <AccessibleButton
                 title={isProcessing 
-                  ? 'Processing...' 
-                  : isSignUp ? 'Create Account' : 'Sign In'
+                  ? 'Duke Përpunuar...' 
+                  : isSignUp ? 'Krijo Llogari' : 'Identifikohu'
                 }
                 icon={isSignUp ? <UserPlus size={32} color={Colors.white} /> : <LogIn size={32} color={Colors.white} />}
                 onPress={handleAuth}
                 disabled={isProcessing}
-                accessibilityLabel={isSignUp ? 'Create account button' : 'Sign in button'}
+                accessibilityLabel={isSignUp ? 'Butoni krijo llogari' : 'Butoni identifikohu'}
                 accessibilityHint={isSignUp 
-                  ? 'Creates your SafeStepAI account' 
-                  : 'Signs you into your account'
+                  ? 'Krijon llogarinë tënde SafeStepAI' 
+                  : 'Të identifikon në llogarinë tënde'
                 }
               />
 
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>OR</Text>
+                <Text style={styles.dividerText}>OSE</Text>
                 <View style={styles.dividerLine} />
               </View>
 
               <AccessibleButton
-                title={isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
+                title={isSignUp ? 'Ke tashmë llogari? Identifikohu' : 'Keni nevojë për llogari? Regjistrohu'}
                 onPress={toggleMode}
                 variant="secondary"
-                accessibilityLabel={isSignUp ? 'Switch to sign in' : 'Switch to sign up'}
+                accessibilityLabel={isSignUp ? 'Kalo tek identifikimi' : 'Kalo tek regjistrimi'}
                 accessibilityHint={isSignUp 
-                  ? 'Already have an account? Tap to sign in instead' 
-                  : 'New user? Tap to create an account'
+                  ? 'Ke tashmë llogari? Prek për t\'u identifikuar' 
+                  : 'Përdorues i ri? Prek për të krijuar llogari'
                 }
               />
             </View>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>
-                Your medical information will be securely stored on your device
+                Informacioni juaj mjekësor do të ruhet në mënyrë të sigurt në pajisjen tuaj
               </Text>
             </View>
           </ScrollView>

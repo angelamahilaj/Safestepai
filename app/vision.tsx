@@ -71,23 +71,29 @@ export default function VisionScreen() {
       console.log('[Vision] Image captured successfully, size:', photo.base64.length);
       console.log('[Vision] Sending to AI for analysis...');
 
-      const description = await generateText({
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
-              },
-              {
-                type: 'image',
-                image: `data:image/jpeg;base64,${photo.base64}`,
-              },
-            ],
-          },
-        ],
-      });
+      let description: string;
+      try {
+        description = await generateText({
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
+                },
+                {
+                  type: 'image',
+                  image: `data:image/jpeg;base64,${photo.base64}`,
+                },
+              ],
+            },
+          ],
+        });
+      } catch (apiError: any) {
+        console.error('[Vision] API Error:', apiError?.message || apiError);
+        throw new Error('Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.');
+      }
 
       console.log('[Vision] Description received successfully');
       setLastDescription(description);

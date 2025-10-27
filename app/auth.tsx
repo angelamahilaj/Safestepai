@@ -20,12 +20,6 @@ export default function AuthScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, router]);
-
-  useEffect(() => {
     const initSpeech = () => {
       initializeWebSpeech();
     };
@@ -53,6 +47,12 @@ export default function AuthScreen() {
     
     return () => clearTimeout(timer);
   }, [isSignUp, speak]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/');
+    }
+  }, [isAuthenticated, router]);
 
   const handleAuth = async () => {
     if (isProcessing) return;

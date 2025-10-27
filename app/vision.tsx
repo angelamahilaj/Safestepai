@@ -94,23 +94,25 @@ export default function VisionScreen() {
       speak(description);
       announceAndVibrate('Analiza u krye', 'success');
     } catch (error: any) {
-      console.error('[Vision] Error details:', {
+      console.error('[Vision] Error:', error?.message || error?.toString() || 'Unknown error');
+      console.error('[Vision] Full error details:', JSON.stringify({
         message: error?.message,
         name: error?.name,
-        stack: error?.stack,
         cause: error?.cause,
-      });
+      }, null, 2));
       
       let errorMessage = 'Na vjen keq, nuk mund të analizoj skenën.';
+      const errorString = error?.message || error?.toString() || '';
       
-      if (error?.message?.includes('Network request failed')) {
+      if (errorString.includes('Network request failed') || errorString.includes('fetch') || errorString.includes('network')) {
         errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
-        console.error('[Vision] Network request failed - possible causes:');
-        console.error('  - No internet connection');
-        console.error('  - EXPO_PUBLIC_TOOLKIT_URL not configured');
-        console.error('  - API endpoint unreachable');
-      } else if (error?.message?.includes('Failed to capture image')) {
+        console.error('[Vision] Network error - please check:');
+        console.error('  1. Internet connection is active');
+        console.error('  2. API service is available');
+      } else if (errorString.includes('Failed to capture image') || errorString.includes('camera')) {
         errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
+      } else if (errorString.includes('timeout')) {
+        errorMessage = 'Koha e pritjes skadoi. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);

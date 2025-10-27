@@ -137,11 +137,16 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
             };
             
             utterance.onerror = (event) => {
-              console.error('[Voice] Web speech error:', event?.error || event);
+              if (event?.error === 'interrupted') {
+                console.log('[Voice] Speech interrupted - normal behavior when new speech starts');
+                setIsSpeaking(false);
+                return;
+              }
+              
               if (event?.error === 'not-allowed') {
-                console.error('[Voice] Speech not allowed - user interaction may be required first');
-              } else if (event?.error === 'interrupted') {
-                console.log('[Voice] Speech interrupted - this is normal when clicking quickly');
+                console.warn('[Voice] Speech not allowed - user interaction may be required first');
+              } else {
+                console.error('[Voice] Web speech error:', event?.error || event);
               }
               setIsSpeaking(false);
             };

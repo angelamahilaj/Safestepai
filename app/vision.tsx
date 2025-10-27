@@ -73,6 +73,7 @@ export default function VisionScreen() {
 
       let description: string;
       try {
+        console.log('[Vision] Calling generateText API...');
         description = await generateText({
           messages: [
             {
@@ -90,8 +91,21 @@ export default function VisionScreen() {
             },
           ],
         });
+        console.log('[Vision] API response received successfully');
       } catch (apiError: any) {
-        console.error('[Vision] API Error:', apiError?.message || apiError);
+        console.error('[Vision] API Error:', apiError);
+        console.error('[Vision] Error type:', typeof apiError);
+        console.error('[Vision] Error message:', apiError?.message);
+        console.error('[Vision] Error stack:', apiError?.stack);
+        
+        const errorMsg = apiError?.message || String(apiError);
+        if (errorMsg.includes('JSON') || errorMsg.includes('Internal Server Error') || errorMsg.includes('Internal S')) {
+          throw new Error('Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.');
+        } else if (errorMsg.includes('Network') || errorMsg.includes('fetch')) {
+          throw new Error('Gabim në lidhjen me serverin. Ju lutem kontrolloni internetin tuaj.');
+        } else if (errorMsg.includes('timeout')) {
+          throw new Error('Koha e pritjes skadoi. Ju lutem provoni përsëri.');
+        }
         throw new Error('Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.');
       }
 
@@ -100,12 +114,18 @@ export default function VisionScreen() {
       speak(description);
       announceAndVibrate('Analiza u krye', 'success');
     } catch (error: any) {
-      console.error('[Vision] Error:', error?.message || error?.toString() || 'Unknown error');
-      console.error('[Vision] Full error details:', JSON.stringify({
-        message: error?.message,
-        name: error?.name,
-        cause: error?.cause,
-      }, null, 2));
+      console.error('[Vision] Error caught:', error);
+      console.error('[Vision] Error type:', typeof error);
+      console.error('[Vision] Error message:', error?.message);
+      try {
+        console.error('[Vision] Full error details:', JSON.stringify({
+          message: error?.message,
+          name: error?.name,
+          cause: error?.cause,
+        }, null, 2));
+      } catch {
+        console.error('[Vision] Could not stringify error');
+      }
       
       let errorMessage = 'Na vjen keq, nuk mund të analizoj skenën.';
       const errorString = error?.message || error?.toString() || '';

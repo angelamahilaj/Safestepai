@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Eye, FileText, Banknote, MapPin, AlertCircle, Navigation2, Heart, Mic, User as UserIcon } from 'lucide-react-native';
+import { Eye, FileText, Banknote, MapPin, AlertCircle, Navigation2, Heart, Mic, User as UserIcon, Glasses, Locate } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDevice } from '@/contexts/DeviceContext';
 import AccessibleButton from '@/components/AccessibleButton';
 import Colors from '@/constants/colors';
 import { useEffect, useState, useRef } from 'react';
@@ -12,6 +13,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { connectedGlasses, connectedStick, isScanning, connectDevice, disconnectDevice } = useDevice();
   const [isListening, setIsListening] = useState(false);
   const isInitialized = useRef(false);
   const welcomeSpoken = useRef(false);
@@ -46,6 +48,69 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          <View style={styles.deviceSection}>
+            <Text style={styles.deviceSectionTitle}>Lidh Pajisjet</Text>
+            <View style={styles.deviceButtons}>
+              <Pressable
+                style={[
+                  styles.deviceButton,
+                  connectedGlasses?.connected && styles.deviceButtonConnected
+                ]}
+                onPress={() => {
+                  if (Platform.OS === 'web' && !isInitialized.current) {
+                    initializeWebSpeech();
+                    isInitialized.current = true;
+                  }
+                  if (connectedGlasses?.connected) {
+                    disconnectDevice('glasses');
+                  } else {
+                    connectDevice('glasses');
+                  }
+                }}
+                disabled={isScanning}
+                accessibilityLabel="Lidh syzet inteligjente"
+                accessibilityHint="Prek për të lidhur ose shkëputur syzet inteligjente"
+              >
+                <Glasses size={32} color={Colors.white} strokeWidth={2} />
+                <Text style={styles.deviceButtonText}>
+                  {connectedGlasses?.connected ? 'Syze të Lidhura' : 'Lidh Syze'}
+                </Text>
+                {connectedGlasses?.connected && (
+                  <View style={styles.connectedIndicator} />
+                )}
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.deviceButton,
+                  connectedStick?.connected && styles.deviceButtonConnected
+                ]}
+                onPress={() => {
+                  if (Platform.OS === 'web' && !isInitialized.current) {
+                    initializeWebSpeech();
+                    isInitialized.current = true;
+                  }
+                  if (connectedStick?.connected) {
+                    disconnectDevice('stick');
+                  } else {
+                    connectDevice('stick');
+                  }
+                }}
+                disabled={isScanning}
+                accessibilityLabel="Lidh shkopun inteligjent"
+                accessibilityHint="Prek për të lidhur ose shkëputur shkopun inteligjent"
+              >
+                <Locate size={32} color={Colors.white} strokeWidth={2} />
+                <Text style={styles.deviceButtonText}>
+                  {connectedStick?.connected ? 'Shkop i Lidhur' : 'Lidh Shkop'}
+                </Text>
+                {connectedStick?.connected && (
+                  <View style={styles.connectedIndicator} />
+                )}
+              </Pressable>
+            </View>
+          </View>
+
           <View style={styles.header}>
             <Pressable
               style={styles.profileButton}
@@ -245,5 +310,54 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700' as const,
     color: Colors.white,
+  },
+  deviceSection: {
+    paddingVertical: 16,
+    gap: 12,
+  },
+  deviceSectionTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: Colors.white,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  deviceButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  deviceButton: {
+    flex: 1,
+    backgroundColor: Colors.blue,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    minHeight: 120,
+    position: 'relative' as const,
+  },
+  deviceButtonConnected: {
+    backgroundColor: Colors.green,
+  },
+  deviceButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: Colors.white,
+    textAlign: 'center',
+  },
+  connectedIndicator: {
+    position: 'absolute' as const,
+    top: 12,
+    right: 12,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#4ADE80',
   },
 });

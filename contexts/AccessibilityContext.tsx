@@ -34,11 +34,31 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
           try {
             window.speechSynthesis.cancel();
             
+            await new Promise<void>((resolve) => {
+              if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.addEventListener('voiceschanged', () => {
+                  resolve();
+                }, { once: true });
+              } else {
+                resolve();
+              }
+            });
+            
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = voiceSettings.rate;
             utterance.pitch = voiceSettings.pitch;
             utterance.volume = voiceSettings.volume;
             utterance.lang = 'en-US';
+            
+            const voices = window.speechSynthesis.getVoices();
+            const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+            if (englishVoice) {
+              utterance.voice = englishVoice;
+            }
+            
+            utterance.onstart = () => {
+              console.log('[Voice] Web speech started');
+            };
             
             utterance.onend = () => {
               console.log('[Voice] Web speech finished');
@@ -51,6 +71,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
             };
             
             window.speechSynthesis.speak(utterance);
+            console.log('[Voice] Utterance queued for speaking');
           } catch (webError: any) {
             console.error('[Voice] Web speech synthesis error:', webError?.message || webError);
             setIsSpeaking(false);
@@ -61,6 +82,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
         }
       } else {
         try {
+          console.log('[Voice] Using native speech');
           await Speech.speak(text, {
             language: 'en-US',
             rate: voiceSettings.rate,
@@ -79,6 +101,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
               setIsSpeaking(false);
             },
           });
+          console.log('[Voice] Native speech initiated');
         } catch (nativeError: any) {
           console.error('[Voice] Native Speech.speak error:', nativeError?.message || nativeError?.toString() || 'Unknown error');
           setIsSpeaking(false);

@@ -71,33 +71,23 @@ export default function VisionScreen() {
       console.log('[Vision] Image captured successfully, size:', photo.base64.length);
       console.log('[Vision] Sending to AI for analysis...');
 
-      let description: string;
-      try {
-        description = await generateText({
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
-                },
-                {
-                  type: 'image',
-                  image: `data:image/jpeg;base64,${photo.base64}`,
-                },
-              ],
-            },
-          ],
-        });
-      } catch (apiError: any) {
-        console.error('[Vision] API Error:', apiError);
-        const errorMsg = apiError?.message || apiError?.toString() || 'Unknown error';
-        if (errorMsg.includes('JSON') || errorMsg.includes('Internal Server Error')) {
-          throw new Error('Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.');
-        }
-        throw apiError;
-      }
+      const description = await generateText({
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
+              },
+              {
+                type: 'image',
+                image: `data:image/jpeg;base64,${photo.base64}`,
+              },
+            ],
+          },
+        ],
+      });
 
       console.log('[Vision] Description received successfully');
       setLastDescription(description);
@@ -114,7 +104,10 @@ export default function VisionScreen() {
       let errorMessage = 'Na vjen keq, nuk mund të analizoj skenën.';
       const errorString = error?.message || error?.toString() || '';
       
-      if (errorString.includes('AI nuk është i disponueshëm') || errorString.includes('disponueshëm')) {
+      if (errorString.includes('JSON') || errorString.includes('SyntaxError') || errorString.includes('Internal Server Error') || errorString.includes('Internal S')) {
+        errorMessage = 'Shërbimi i AI nuk është i disponueshëm. Ju lutem provoni përsëri më vonë.';
+        console.error('[Vision] API returned invalid response - service may be down');
+      } else if (errorString.includes('AI nuk është i disponueshëm') || errorString.includes('disponueshëm')) {
         errorMessage = errorString;
       } else if (errorString.includes('Network request failed') || errorString.includes('fetch') || errorString.includes('network')) {
         errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';

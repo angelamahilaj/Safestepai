@@ -81,8 +81,9 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
           try {
             if (!isWebSpeechInitialized) {
-              console.log('[Voice] Initializing web speech first');
-              initializeWebSpeech();
+              console.warn('[Voice] Web speech not initialized yet. Waiting for user interaction.');
+              setIsSpeaking(false);
+              return;
             }
             
             window.speechSynthesis.cancel();
@@ -189,7 +190,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
       });
       setIsSpeaking(false);
     }
-  }, [voiceSettings, availableLanguages, isWebSpeechInitialized, initializeWebSpeech]);
+  }, [voiceSettings, availableLanguages, isWebSpeechInitialized]);
 
   const stopSpeaking = useCallback(() => {
     console.log('[Voice] Stopping speech');

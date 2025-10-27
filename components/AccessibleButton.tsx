@@ -1,7 +1,7 @@
-import { Pressable, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Pressable, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import Colors from '@/constants/colors';
-import { ReactNode } from 'react';
+import { ReactNode, useRef } from 'react';
 
 type AccessibleButtonProps = {
   onPress: () => void;
@@ -24,10 +24,16 @@ export default function AccessibleButton({
   accessibilityLabel,
   accessibilityHint,
 }: AccessibleButtonProps) {
-  const { announceAndVibrate } = useAccessibility();
+  const { announceAndVibrate, initializeWebSpeech } = useAccessibility();
+  const isInitialized = useRef(false);
 
   const handlePress = () => {
     if (disabled) return;
+    
+    if (Platform.OS === 'web' && !isInitialized.current) {
+      initializeWebSpeech();
+      isInitialized.current = true;
+    }
     
     announceAndVibrate(title, variant === 'emergency' ? 'warning' : 'medium');
     onPress();

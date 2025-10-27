@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Eye, FileText, Banknote, MapPin, AlertCircle, Navigation2, Heart, Mic, User as UserIcon } from 'lucide-react-native';
@@ -6,13 +6,15 @@ import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import AccessibleButton from '@/components/AccessibleButton';
 import Colors from '@/constants/colors';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isListening, setIsListening] = useState(false);
+  const isInitialized = useRef(false);
+  const welcomeSpoken = useRef(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -21,27 +23,12 @@ export default function HomeScreen() {
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    const initSpeech = () => {
-      initializeWebSpeech();
-    };
-    
-    if (typeof window !== 'undefined') {
-      document.addEventListener('click', initSpeech, { once: true });
-      document.addEventListener('touchstart', initSpeech, { once: true });
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        document.removeEventListener('click', initSpeech);
-        document.removeEventListener('touchstart', initSpeech);
-      }
-    };
-  }, [initializeWebSpeech]);
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !welcomeSpoken.current) {
       const timer = setTimeout(() => {
-        speak(`Mirë se erdhe ${user.name}. Safe Step A I është gati për t'ju ndihmuar.`);
+        if (Platform.OS !== 'web') {
+          speak(`Mirë se erdhe ${user.name}. Safe Step A I është gati për t'ju ndihmuar.`);
+          welcomeSpoken.current = true;
+        }
       }, 500);
       
       return () => clearTimeout(timer);
@@ -63,6 +50,10 @@ export default function HomeScreen() {
             <Pressable
               style={styles.profileButton}
               onPress={() => {
+                if (Platform.OS === 'web' && !isInitialized.current) {
+                  initializeWebSpeech();
+                  isInitialized.current = true;
+                }
                 announceAndVibrate('Profili juaj', 'light');
                 router.push('/profile');
               }}
@@ -81,6 +72,10 @@ export default function HomeScreen() {
           <Pressable
             style={styles.voiceButton}
             onPress={() => {
+              if (Platform.OS === 'web' && !isInitialized.current) {
+                initializeWebSpeech();
+                isInitialized.current = true;
+              }
               setIsListening(!isListening);
               if (!isListening) {
                 announceAndVibrate('Komandë me zë. Duke dëgjuar. Ju lutem flisni komandën tuaj.', 'medium');

@@ -13,6 +13,7 @@ type VoiceSettings = {
 export const [AccessibilityProvider, useAccessibility] = createContextHook(() => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+  const [isWebSpeechInitialized, setIsWebSpeechInitialized] = useState(false);
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
     rate: 0.8,
     pitch: 1.0,
@@ -30,9 +31,39 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
         } catch (error) {
           console.error('[Voice] Error checking languages:', error);
         }
+      } else {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            console.log('[Voice] Web voices loaded:', voices.length);
+            if (voices.length > 0) {
+              setIsWebSpeechInitialized(true);
+            }
+          };
+          
+          if (window.speechSynthesis.getVoices().length > 0) {
+            loadVoices();
+          } else {
+            window.speechSynthesis.addEventListener('voiceschanged', loadVoices, { once: true });
+          }
+        }
       }
     };
     checkLanguages();
+  }, []);
+
+  const initializeWebSpeech = useCallback(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        const utterance = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(utterance);
+        window.speechSynthesis.cancel();
+        console.log('[Voice] Web speech initialized');
+        setIsWebSpeechInitialized(true);
+      } catch (error) {
+        console.error('[Voice] Error initializing web speech:', error);
+      }
+    }
   }, []);
 
   const speak = useCallback(async (text: string) => {
@@ -49,14 +80,20 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
         console.log('[Voice] Using web speech synthesis');
         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
           try {
+            if (!isWebSpeechInitialized) {
+              console.log('[Voice] Initializing web speech first');
+              initializeWebSpeech();
+            }
+            
             window.speechSynthesis.cancel();
             
             await new Promise<void>((resolve) => {
-              if (window.speechSynthesis.getVoices().length === 0) {
+              const voices = window.speechSynthesis.getVoices();
+              if (voices.length === 0) {
                 window.speechSynthesis.addEventListener('voiceschanged', () => {
                   resolve();
                 }, { once: true });
-                setTimeout(() => resolve(), 1000);
+                setTimeout(() => resolve(), 500);
               } else {
                 resolve();
               }
@@ -69,9 +106,18 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
             utterance.lang = 'sq-AL';
             
             const voices = window.speechSynthesis.getVoices();
-            const albanianVoice = voices.find(voice => voice.lang.startsWith('sq'));
+            console.log('[Voice] Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+            
+            const albanianVoice = voices.find(voice => 
+              voice.lang.toLowerCase().startsWith('sq') || 
+              voice.lang.toLowerCase().includes('albanian')
+            );
+            
             if (albanianVoice) {
+              console.log('[Voice] Using Albanian voice:', albanianVoice.name);
               utterance.voice = albanianVoice;
+            } else {
+              console.log('[Voice] No Albanian voice found, using default');
             }
             
             utterance.onstart = () => {
@@ -85,6 +131,9 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
             
             utterance.onerror = (event) => {
               console.error('[Voice] Web speech error:', event?.error || event);
+              if (event?.error === 'not-allowed') {
+                console.error('[Voice] Speech not allowed - user interaction may be required first');
+              }
               setIsSpeaking(false);
             };
             
@@ -140,7 +189,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
       });
       setIsSpeaking(false);
     }
-  }, [voiceSettings, availableLanguages]);
+  }, [voiceSettings, availableLanguages, isWebSpeechInitialized, initializeWebSpeech]);
 
   const stopSpeaking = useCallback(() => {
     console.log('[Voice] Stopping speech');
@@ -202,5 +251,6 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
     announceAndVibrate,
     voiceSettings,
     setVoiceSettings,
-  }), [speak, stopSpeaking, isSpeaking, hapticFeedback, announceAndVibrate, voiceSettings]);
+    initializeWebSpeech,
+  }), [speak, stopSpeaking, isSpeaking, hapticFeedback, announceAndVibrate, voiceSettings, initializeWebSpeech]);
 });

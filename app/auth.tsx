@@ -10,7 +10,7 @@ import Colors from '@/constants/colors';
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { speak, announceAndVibrate } = useAccessibility();
+  const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
   const { signIn, signUp, isAuthenticated } = useAuth();
   
   const [isSignUp, setIsSignUp] = useState(true);
@@ -24,6 +24,24 @@ export default function AuthScreen() {
       router.replace('/');
     }
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    const initSpeech = () => {
+      initializeWebSpeech();
+    };
+    
+    if (typeof window !== 'undefined') {
+      document.addEventListener('click', initSpeech, { once: true });
+      document.addEventListener('touchstart', initSpeech, { once: true });
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('click', initSpeech);
+        document.removeEventListener('touchstart', initSpeech);
+      }
+    };
+  }, [initializeWebSpeech]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

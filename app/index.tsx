@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { speak, announceAndVibrate } = useAccessibility();
+  const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [isListening, setIsListening] = useState(false);
 
@@ -19,6 +19,24 @@ export default function HomeScreen() {
       router.replace('/auth');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    const initSpeech = () => {
+      initializeWebSpeech();
+    };
+    
+    if (typeof window !== 'undefined') {
+      document.addEventListener('click', initSpeech, { once: true });
+      document.addEventListener('touchstart', initSpeech, { once: true });
+    }
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        document.removeEventListener('click', initSpeech);
+        document.removeEventListener('touchstart', initSpeech);
+      }
+    };
+  }, [initializeWebSpeech]);
 
   useEffect(() => {
     if (isAuthenticated && user) {

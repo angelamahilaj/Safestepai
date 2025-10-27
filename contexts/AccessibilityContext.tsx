@@ -73,6 +73,12 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
     }
     
     console.log('[Voice] Speaking:', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
+    
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
     setIsSpeaking(true);
     
     try {
@@ -86,7 +92,7 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
               return;
             }
             
-            window.speechSynthesis.cancel();
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             await new Promise<void>((resolve) => {
               const voices = window.speechSynthesis.getVoices();
@@ -134,6 +140,8 @@ export const [AccessibilityProvider, useAccessibility] = createContextHook(() =>
               console.error('[Voice] Web speech error:', event?.error || event);
               if (event?.error === 'not-allowed') {
                 console.error('[Voice] Speech not allowed - user interaction may be required first');
+              } else if (event?.error === 'interrupted') {
+                console.log('[Voice] Speech interrupted - this is normal when clicking quickly');
               }
               setIsSpeaking(false);
             };

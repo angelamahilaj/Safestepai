@@ -17,7 +17,7 @@ export default function NavigationScreen() {
   const [activeMode, setActiveMode] = useState<NavigationMode>('none');
   const [destination, setDestination] = useState('');
   const [showDestinationModal, setShowDestinationModal] = useState(false);
-  const navigationInterval = useRef<NodeJS.Timeout | null>(null);
+  const navigationInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     speak('Navigation screen. Select a navigation mode or speak your destination.');
@@ -287,7 +287,7 @@ export default function NavigationScreen() {
             {activeMode !== 'none' && (
               <View style={styles.activeModeCard}>
                 <Target size={32} color={Colors.green} strokeWidth={2.5} />
-                <View style={{ flex: 1 }}>
+                <View style={styles.activeModeTextContainer}>
                   <Text style={styles.activeModeText}>
                     {activeMode === 'normal' && 'Navigation Active'}
                     {activeMode === 'obstacle' && 'Obstacle Detection Active'}
@@ -540,6 +540,9 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.green,
     transform: [{ scale: 0.98 }],
+  },
+  activeModeTextContainer: {
+    flex: 1,
   },
   modalOverlay: {
     flex: 1,

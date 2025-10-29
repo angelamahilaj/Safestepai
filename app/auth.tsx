@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Pl
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { UserPlus, LogIn, Mic, Phone, Mail, User as UserIcon } from 'lucide-react-native';
+import { UserPlus, LogIn, Mic, Phone, Mail, User as UserIcon, Lock, Calendar } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import AccessibleButton from '@/components/AccessibleButton';
@@ -16,7 +16,9 @@ export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -62,8 +64,18 @@ export default function AuthScreen() {
       return;
     }
 
+    if (!password.trim()) {
+      announceAndVibrate('Ju lutem vendosni fjalëkalimin', 'error');
+      return;
+    }
+
     if (isSignUp && !name.trim()) {
       announceAndVibrate('Ju lutem vendosni emrin tuaj', 'error');
+      return;
+    }
+
+    if (isSignUp && password.length < 6) {
+      announceAndVibrate('Fjalëkalimi duhet të ketë të paktën 6 karaktere', 'error');
       return;
     }
 
@@ -72,8 +84,8 @@ export default function AuthScreen() {
 
     try {
       const result = isSignUp 
-        ? await signUp(name, email, phone)
-        : await signIn(email);
+        ? await signUp(name, email, password, phone, birthday)
+        : await signIn(email, password);
 
       if (result.success) {
         announceAndVibrate(
@@ -171,6 +183,25 @@ export default function AuthScreen() {
                 />
               </View>
 
+              <View style={styles.inputGroup}>
+                <View style={styles.inputIconContainer}>
+                  <Lock size={24} color={Colors.blue} />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder={isSignUp ? "Fjalëkalimi (min 6 karaktere)" : "Fjalëkalimi"}
+                  placeholderTextColor={Colors.lightGray}
+                  value={password}
+                  onChangeText={setPassword}
+                  accessibilityLabel="Fusha e fjalëkalimit"
+                  accessibilityHint="Vendosni fjalëkalimin tuaj"
+                  onFocus={() => speak('Fusha e fjalëkalimit.')}
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoComplete="password"
+                />
+              </View>
+
               {isSignUp && (
                 <View style={styles.inputGroup}>
                   <View style={styles.inputIconContainer}>
@@ -187,6 +218,25 @@ export default function AuthScreen() {
                     onFocus={() => speak('Fusha e numrit të telefonit. Kjo është opsionale.')}
                     keyboardType="phone-pad"
                     autoComplete="tel"
+                  />
+                </View>
+              )}
+
+              {isSignUp && (
+                <View style={styles.inputGroup}>
+                  <View style={styles.inputIconContainer}>
+                    <Calendar size={24} color={Colors.blue} />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ditëlindja (Opsionale) - DD/MM/YYYY"
+                    placeholderTextColor={Colors.lightGray}
+                    value={birthday}
+                    onChangeText={setBirthday}
+                    accessibilityLabel="Fusha e ditëlindjes"
+                    accessibilityHint="Vendosni ditëlindjen tuaj, opsionale"
+                    onFocus={() => speak('Fusha e ditëlindjes. Kjo është opsionale.')}
+                    keyboardType="numbers-and-punctuation"
                   />
                 </View>
               )}

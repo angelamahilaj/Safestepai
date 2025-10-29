@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Pl
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { Save, User as UserIcon, Mail, Phone } from 'lucide-react-native';
+import { Save, User as UserIcon, Mail, Phone, Calendar } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import AccessibleButton from '@/components/AccessibleButton';
@@ -16,6 +16,7 @@ export default function EditProfileScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function EditProfileScreen() {
       setName(user.name);
       setEmail(user.email);
       setPhone(user.phone || '');
+      setBirthday(user.birthday || '');
     }
   }, [user]);
 
@@ -54,6 +56,7 @@ export default function EditProfileScreen() {
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim() || undefined,
+      birthday: birthday.trim() || undefined,
     });
 
     if (result.success) {
@@ -142,6 +145,25 @@ export default function EditProfileScreen() {
                   accessibilityLabel="Fusha e numrit të telefonit"
                   onFocus={() => speak('Fusha e numrit të telefonit. Kjo është opsionale.')}
                   keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.label}>Ditëlindja (Opsional)</Text>
+              <View style={styles.inputGroup}>
+                <View style={styles.inputIconContainer}>
+                  <Calendar size={24} color={Colors.blue} />
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="DD/MM/YYYY"
+                  placeholderTextColor={Colors.lightGray}
+                  value={birthday}
+                  onChangeText={setBirthday}
+                  accessibilityLabel="Fusha e ditëlindjes"
+                  onFocus={() => speak('Fusha e ditëlindjes. Kjo është opsionale.')}
+                  keyboardType="numbers-and-punctuation"
                 />
               </View>
             </View>

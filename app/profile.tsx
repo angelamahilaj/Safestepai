@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { User as UserIcon, Mail, Phone, Heart, LogOut, Edit, AlertCircle } from 'lucide-react-native';
+import { User as UserIcon, Mail, Phone, Heart, LogOut, Edit, AlertCircle, Calendar } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/AuthContext';
 import AccessibleButton from '@/components/AccessibleButton';
@@ -85,6 +85,18 @@ export default function ProfileScreen() {
                   <View style={styles.infoContent}>
                     <Text style={styles.infoLabel}>Telefoni</Text>
                     <Text style={styles.infoValue}>{user.phone}</Text>
+                  </View>
+                </View>
+              )}
+
+              {user.birthday && (
+                <View style={styles.infoRow}>
+                  <View style={styles.infoIcon}>
+                    <Calendar size={24} color={Colors.blue} />
+                  </View>
+                  <View style={styles.infoContent}>
+                    <Text style={styles.infoLabel}>Ditëlindja</Text>
+                    <Text style={styles.infoValue}>{user.birthday}</Text>
                   </View>
                 </View>
               )}

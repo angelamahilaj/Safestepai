@@ -30,6 +30,8 @@ export type User = {
   name: string;
   email: string;
   phone?: string;
+  password: string;
+  birthday?: string;
   medicalInfo?: MedicalInfo;
   createdAt: string;
 };
@@ -62,14 +64,16 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     loadUser();
   }, [loadUser]);
 
-  const signUp = useCallback(async (name: string, email: string, phone?: string) => {
+  const signUp = useCallback(async (name: string, email: string, password: string, phone?: string, birthday?: string) => {
     console.log('[Auth] Signing up:', email);
     try {
       const newUser: User = {
         id: Date.now().toString(),
         name,
         email,
+        password,
         phone,
+        birthday,
         createdAt: new Date().toISOString(),
       };
       
@@ -83,16 +87,20 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
-  const signIn = useCallback(async (email: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     console.log('[Auth] Signing in:', email);
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const userData: User = JSON.parse(stored);
         if (userData.email.toLowerCase() === email.toLowerCase()) {
-          setUser(userData);
-          console.log('[Auth] User signed in successfully');
-          return { success: true, user: userData };
+          if (userData.password === password) {
+            setUser(userData);
+            console.log('[Auth] User signed in successfully');
+            return { success: true, user: userData };
+          } else {
+            return { success: false, error: 'Fjalëkalimi është i pasaktë' };
+          }
         }
       }
       return { success: false, error: 'Account not found. Please sign up first.' };

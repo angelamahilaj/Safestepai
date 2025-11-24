@@ -3,38 +3,46 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DeviceProvider } from "@/contexts/DeviceContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { trpc, trpcClient } from "@/lib/trpc";
 
-SplashScreen.preventAutoHideAsync();
+// Prevent hiding splash until app is ready
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="auth" options={{ headerShown: false }} />
-      <Stack.Screen name="profile" options={{ headerShown: false }} />
-      <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
-      <Stack.Screen name="medical-info" options={{ headerShown: false }} />
-      <Stack.Screen name="vision" options={{ headerShown: false }} />
-      <Stack.Screen name="text-reader" options={{ headerShown: false }} />
-      <Stack.Screen name="currency" options={{ headerShown: false }} />
-      <Stack.Screen name="location" options={{ headerShown: false }} />
-      <Stack.Screen name="navigation" options={{ headerShown: false }} />
-      <Stack.Screen name="health" options={{ headerShown: false }} />
-      <Stack.Screen name="emergency" options={{ headerShown: false, presentation: "modal" }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="auth" />
+      <Stack.Screen name="profile" />
+      <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="medical-info" />
+      <Stack.Screen name="vision" />
+      <Stack.Screen name="text-reader" />
+      <Stack.Screen name="currency" />
+      <Stack.Screen name="location" />
+      <Stack.Screen name="navigation" />
+      <Stack.Screen name="health" />
+      <Stack.Screen
+        name="emergency"
+        options={{ presentation: "modal" }}
+      />
     </Stack>
   );
 }
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
+    // Ensures splash hides safely even if something throws
+    setTimeout(() => {
+      SplashScreen.hideAsync().catch(() => {});
+    }, 200);
   }, []);
 
   return (

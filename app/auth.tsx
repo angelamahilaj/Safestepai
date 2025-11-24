@@ -1,282 +1,274 @@
-import { View, Text, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { UserPlus, LogIn, Mic, Phone, Mail, User as UserIcon, Lock, Calendar } from 'lucide-react-native';
-import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { useAuth } from '@/contexts/AuthContext';
-import AccessibleButton from '@/components/AccessibleButton';
-import Colors from '@/constants/colors';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useState, useEffect } from "react";
+
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
+
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { useAuth } from "@/contexts/AuthContext";
+import AccessibleButton from "@/components/AccessibleButton";
+import Colors from "@/constants/colors";
 
 export default function AuthScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
   const { signIn, signUp, isAuthenticated } = useAuth();
-  
+
   const [isSignUp, setIsSignUp] = useState(true);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [birthday, setBirthday] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // ------------------------------
+  // Initialize Web Speech (WEB ONLY)
+  // ------------------------------
   useEffect(() => {
-    const initSpeech = () => {
-      initializeWebSpeech();
-    };
-    
-    if (typeof window !== 'undefined') {
-      document.addEventListener('click', initSpeech, { once: true });
-      document.addEventListener('touchstart', initSpeech, { once: true });
-    }
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        document.removeEventListener('click', initSpeech);
-        document.removeEventListener('touchstart', initSpeech);
-      }
-    };
-  }, [initializeWebSpeech]);
+    if (Platform.OS !== "web") return;
 
+    const init = () => initializeWebSpeech();
+
+    document.addEventListener("click", init, { once: true });
+    document.addEventListener("touchstart", init, { once: true });
+
+    return () => {
+      document.removeEventListener("click", init);
+      document.removeEventListener("touchstart", init);
+    };
+  }, []);
+
+  // ------------------------------
+  // Voice Welcome
+  // ------------------------------
   useEffect(() => {
     const timer = setTimeout(() => {
-      speak(isSignUp 
-        ? 'Mirë se erdhe në Safe Step A I. Krijo llogarinë tënde për të filluar. Mund të përdorësh komanda me zë për të plotësuar informacionin tënd.'
-        : 'Mirë se u ktheve në Safe Step A I. Ju lutem identifikohu për të vazhduar.'
+      speak(
+        isSignUp
+          ? "Krijo llogarinë tënde në SafeStep AI. Mund të përdorësh edhe komandat me zë."
+          : "Identifikohu për të vazhduar."
       );
-    }, 500);
-    
+    }, 600);
+
     return () => clearTimeout(timer);
-  }, [isSignUp, speak]);
+  }, [isSignUp]);
 
+  // Auto redirect if logged in
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/');
-    }
-  }, [isAuthenticated, router]);
+    if (isAuthenticated) router.replace("/");
+  }, [isAuthenticated]);
 
+  // ------------------------------
+  // Handle Login/Register
+  // ------------------------------
   const handleAuth = async () => {
     if (isProcessing) return;
 
     if (!email.trim()) {
-      announceAndVibrate('Ju lutem vendosni adresën tuaj të emailit', 'error');
-      return;
+      return announceAndVibrate("Ju lutem vendosni emailin", "error");
     }
-
     if (!password.trim()) {
-      announceAndVibrate('Ju lutem vendosni fjalëkalimin', 'error');
-      return;
+      return announceAndVibrate("Ju lutem vendosni fjalëkalimin", "error");
     }
-
     if (isSignUp && !name.trim()) {
-      announceAndVibrate('Ju lutem vendosni emrin tuaj', 'error');
-      return;
+      return announceAndVibrate("Ju lutem vendosni emrin", "error");
     }
-
     if (isSignUp && password.length < 6) {
-      announceAndVibrate('Fjalëkalimi duhet të ketë të paktën 6 karaktere', 'error');
-      return;
+      return announceAndVibrate(
+        "Fjalëkalimi duhet të ketë të paktën 6 karaktere",
+        "error"
+      );
     }
 
     setIsProcessing(true);
-    announceAndVibrate('Duke përpunuar kërkesën tuaj', 'medium');
+    announceAndVibrate("Duke përpunuar...", "medium");
 
-    try {
-      const result = isSignUp 
-        ? await signUp(name, email, password, phone, birthday)
-        : await signIn(email, password);
+    const result = isSignUp
+      ? await signUp(name, email, password, phone, birthday)
+      : await signIn(email, password);
 
-      if (result.success) {
-        announceAndVibrate(
-          isSignUp 
-            ? `Mirë se erdhe ${name}! Llogaria juaj u krijua me sukses.`
-            : `Mirë se u ktheve! U identifikove me sukses.`,
-          'success'
-        );
-        setTimeout(() => {
-          router.replace('/');
-        }, 1000);
-      } else {
-        announceAndVibrate(result.error || 'Identifikimi dështoi', 'error');
-      }
-    } catch (error) {
-      console.error('[Auth] Error:', error);
-      announceAndVibrate('Ndodhi një gabim. Ju lutem provoni përsëri.', 'error');
-    } finally {
-      setIsProcessing(false);
+    if (result.success) {
+      announceAndVibrate(
+        isSignUp ? `Mirë se erdhe ${name}!` : "U identifikove me sukses.",
+        "success"
+      );
+      setTimeout(() => router.replace("/"), 700);
+    } else {
+      announceAndVibrate(result.error || "Gabim në identifikim", "error");
     }
-  };
 
-  const toggleMode = () => {
-    setIsSignUp(!isSignUp);
-    announceAndVibrate(
-      isSignUp ? 'U ndryshue në mënyrën e identifikimit' : 'U ndryshue në mënyrën e krijimit të llogarisë',
-      'light'
-    );
+    setIsProcessing(false);
   };
 
   return (
     <View style={styles.backgroundContainer}>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
         >
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
           >
+            {/* HEADER */}
             <View style={styles.header}>
               <Text style={styles.logo}>SafeStepAI</Text>
               <Text style={styles.subtitle}>
-                {isSignUp ? 'Krijo Llogarinë Tënde' : 'Mirë se u ktheve'}
+                {isSignUp ? "Krijo llogarinë" : "Identifikohu"}
               </Text>
             </View>
 
+            {/* VOICE STATUS */}
             <View style={styles.voiceSection}>
               <View style={styles.voiceIndicator}>
-                <Mic size={32} color={Colors.white} />
+                <Ionicons name="mic" size={28} color="white" />
               </View>
               <Text style={styles.voiceText}>
-                Komandat me zë janë në dispozicion. Thuaj &quot;ndihmë&quot; për asistencë.
+                Komandat me zë janë aktive. Thuaj "ndihmë" për asistencë.
               </Text>
             </View>
 
+            {/* -------------------------
+                 FORM INPUTS
+            --------------------------- */}
             <View style={styles.form}>
               {isSignUp && (
                 <View style={styles.inputGroup}>
-                  <View style={styles.inputIconContainer}>
-                    <UserIcon size={24} color={Colors.blue} />
-                  </View>
+                  <FontAwesome
+                    name="user"
+                    size={22}
+                    color={Colors.blue}
+                    style={styles.icon}
+                  />
                   <TextInput
                     style={styles.input}
-                    placeholder="Emri Juaj"
+                    placeholder="Emri juaj"
                     placeholderTextColor={Colors.lightGray}
                     value={name}
                     onChangeText={setName}
-                    accessibilityLabel="Fusha e emrit"
-                    accessibilityHint="Vendosni emrin tuaj të plotë"
-                    onFocus={() => speak('Fusha e emrit. Vendosni emrin tuaj të plotë.')}
-                    autoCapitalize="words"
+                    onFocus={() => speak("Fusha e emrit")}
                   />
                 </View>
               )}
 
               <View style={styles.inputGroup}>
-                <View style={styles.inputIconContainer}>
-                  <Mail size={24} color={Colors.blue} />
-                </View>
+                <MaterialIcons
+                  name="email"
+                  size={22}
+                  color={Colors.blue}
+                  style={styles.icon}
+                />
                 <TextInput
                   style={styles.input}
-                  placeholder="Adresa e Emailit"
+                  placeholder="Email"
                   placeholderTextColor={Colors.lightGray}
                   value={email}
                   onChangeText={setEmail}
-                  accessibilityLabel="Fusha e emailit"
-                  accessibilityHint="Vendosni adresën tuaj të emailit"
-                  onFocus={() => speak('Fusha e emailit. Vendosni adresën tuaj të emailit.')}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  autoComplete="email"
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <View style={styles.inputIconContainer}>
-                  <Lock size={24} color={Colors.blue} />
-                </View>
+                <FontAwesome
+                  name="lock"
+                  size={22}
+                  color={Colors.blue}
+                  style={styles.icon}
+                />
                 <TextInput
                   style={styles.input}
-                  placeholder={isSignUp ? "Fjalëkalimi (min 6 karaktere)" : "Fjalëkalimi"}
+                  placeholder="Fjalëkalimi"
                   placeholderTextColor={Colors.lightGray}
                   value={password}
                   onChangeText={setPassword}
-                  accessibilityLabel="Fusha e fjalëkalimit"
-                  accessibilityHint="Vendosni fjalëkalimin tuaj"
-                  onFocus={() => speak('Fusha e fjalëkalimit.')}
                   secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password"
                 />
               </View>
 
+              {/* REGISTER FIELDS */}
               {isSignUp && (
-                <View style={styles.inputGroup}>
-                  <View style={styles.inputIconContainer}>
-                    <Phone size={24} color={Colors.blue} />
+                <>
+                  <View style={styles.inputGroup}>
+                    <Ionicons
+                      name="call"
+                      size={22}
+                      color={Colors.blue}
+                      style={styles.icon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Numri i telefonit (opsionale)"
+                      placeholderTextColor={Colors.lightGray}
+                      value={phone}
+                      onChangeText={setPhone}
+                      keyboardType="phone-pad"
+                    />
                   </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Numri i Telefonit (Opsionale)"
-                    placeholderTextColor={Colors.lightGray}
-                    value={phone}
-                    onChangeText={setPhone}
-                    accessibilityLabel="Fusha e numrit të telefonit"
-                    accessibilityHint="Vendosni numrin tuaj të telefonit, opsionale"
-                    onFocus={() => speak('Fusha e numrit të telefonit. Kjo është opsionale.')}
-                    keyboardType="phone-pad"
-                    autoComplete="tel"
-                  />
-                </View>
+
+                  <View style={styles.inputGroup}>
+                    <Ionicons
+                      name="calendar"
+                      size={22}
+                      color={Colors.blue}
+                      style={styles.icon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ditëlindja - DD/MM/YYYY"
+                      placeholderTextColor={Colors.lightGray}
+                      value={birthday}
+                      onChangeText={setBirthday}
+                    />
+                  </View>
+                </>
               )}
 
-              {isSignUp && (
-                <View style={styles.inputGroup}>
-                  <View style={styles.inputIconContainer}>
-                    <Calendar size={24} color={Colors.blue} />
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Ditëlindja (Opsionale) - DD/MM/YYYY"
-                    placeholderTextColor={Colors.lightGray}
-                    value={birthday}
-                    onChangeText={setBirthday}
-                    accessibilityLabel="Fusha e ditëlindjes"
-                    accessibilityHint="Vendosni ditëlindjen tuaj, opsionale"
-                    onFocus={() => speak('Fusha e ditëlindjes. Kjo është opsionale.')}
-                    keyboardType="numbers-and-punctuation"
-                  />
-                </View>
-              )}
-
+              {/* BUTTON LOGIN / REGISTER */}
               <AccessibleButton
-                title={isProcessing 
-                  ? 'Duke Përpunuar...' 
-                  : isSignUp ? 'Krijo Llogari' : 'Identifikohu'
+                title={
+                  isProcessing
+                    ? "Duke përpunuar..."
+                    : isSignUp
+                    ? "Krijo Llogari"
+                    : "Identifikohu"
                 }
-                icon={isSignUp ? <UserPlus size={32} color={Colors.white} /> : <LogIn size={32} color={Colors.white} />}
                 onPress={handleAuth}
-                disabled={isProcessing}
-                accessibilityLabel={isSignUp ? 'Butoni krijo llogari' : 'Butoni identifikohu'}
-                accessibilityHint={isSignUp 
-                  ? 'Krijon llogarinë tënde SafeStepAI' 
-                  : 'Të identifikon në llogarinë tënde'
+                icon={
+                  isSignUp ? (
+                    <FontAwesome name="user-plus" size={28} color="white" />
+                  ) : (
+                    <FontAwesome name="sign-in" size={28} color="white" />
+                  )
                 }
               />
 
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>OSE</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
+              {/* SWITCH MODE */}
               <AccessibleButton
-                title={isSignUp ? 'Ke tashmë llogari? Identifikohu' : 'Keni nevojë për llogari? Regjistrohu'}
-                onPress={toggleMode}
-                variant="secondary"
-                accessibilityLabel={isSignUp ? 'Kalo tek identifikimi' : 'Kalo tek regjistrimi'}
-                accessibilityHint={isSignUp 
-                  ? 'Ke tashmë llogari? Prek për t\'u identifikuar' 
-                  : 'Përdorues i ri? Prek për të krijuar llogari'
+                title={
+                  isSignUp
+                    ? "Ke llogari? Hyr"
+                    : "Je i ri? Krijo llogari"
                 }
+                onPress={() => setIsSignUp(!isSignUp)}
+                variant="secondary"
               />
             </View>
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>
-                Informacioni juaj mjekësor do të ruhet në mënyrë të sigurt në pajisjen tuaj
+                Të dhënat ruhen vetëm në pajisjen tuaj dhe nuk ndahen me askënd.
               </Text>
             </View>
           </ScrollView>
@@ -291,102 +283,74 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.darkNavy,
   },
-  container: {
-    flex: 1,
-  },
-  keyboardView: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   scrollContent: {
     padding: 20,
     gap: 24,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
-    gap: 8,
   },
   logo: {
     fontSize: 42,
-    fontWeight: '900' as const,
+    fontWeight: "900",
     color: Colors.white,
-    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 22,
     color: Colors.lightGray,
-    textAlign: 'center',
   },
   voiceSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.blue + '20',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.blue + "30",
     padding: 16,
     borderRadius: 16,
-    gap: 12,
+    gap: 14,
   },
   voiceIndicator: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: Colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   voiceText: {
     flex: 1,
-    fontSize: 16,
     color: Colors.white,
-    fontWeight: '600' as const,
+    fontSize: 16,
   },
   form: {
     gap: 16,
   },
   inputGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.darkBlue,
-    borderRadius: 16,
+    borderColor: Colors.blue + "40",
     borderWidth: 2,
-    borderColor: Colors.blue + '40',
-    overflow: 'hidden',
+    borderRadius: 16,
+    paddingHorizontal: 12,
   },
-  inputIconContainer: {
-    padding: 16,
-    backgroundColor: Colors.darkBlue,
+  icon: {
+    marginRight: 8,
+    marginLeft: 4,
   },
   input: {
     flex: 1,
-    fontSize: 18,
-    color: Colors.white,
-    padding: 16,
-    paddingLeft: 8,
-    minHeight: 56,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginVertical: 8,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.lightGray + '40',
-  },
-  dividerText: {
+    paddingVertical: 14,
     fontSize: 16,
-    color: Colors.lightGray,
-    fontWeight: '600' as const,
+    color: Colors.white,
   },
   footer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 16,
   },
   footerText: {
     fontSize: 14,
     color: Colors.lightGray,
-    textAlign: 'center',
-    lineHeight: 20,
+    textAlign: "center",
   },
 });

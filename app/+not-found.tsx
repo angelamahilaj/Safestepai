@@ -8,9 +8,9 @@ export default function NotFoundScreen() {
   const { speak, announceAndVibrate } = useAccessibility();
 
   useEffect(() => {
-    speak("Faqja që kërkoni nuk ekziston. Prekni butonin për t’u kthyer në faqen kryesore.");
+    speak("Faqja që kërkoni nuk ekziston. Prekni butonin për t'u kthyer në faqen kryesore.");
     announceAndVibrate("Faqja nuk u gjet", "error");
-  }, []);
+  }, [speak, announceAndVibrate]);
 
   return (
     <>
@@ -22,7 +22,7 @@ export default function NotFoundScreen() {
           <Pressable
             style={styles.link}
             accessibilityLabel="Kthehu në faqen kryesore"
-            accessibilityHint="Prek për t’u kthyer te faqja kryesore e aplikacionit"
+            accessibilityHint="Prek për t'u kthyer te faqja kryesore e aplikacionit"
             onPress={() => {
               speak("Duke u kthyer në faqen kryesore.");
               announceAndVibrate("Kthim", "light");

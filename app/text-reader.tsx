@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { generateText } from '@rork/toolkit-sdk';
+import { generateText } from '@rork-ai/toolkit-sdk';
 import Colors from '@/constants/colors';
 
 export default function TextReaderScreen() {

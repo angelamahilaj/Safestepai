@@ -46,7 +46,7 @@ export default function AuthScreen() {
       document.removeEventListener("click", init);
       document.removeEventListener("touchstart", init);
     };
-  }, []);
+  }, [initializeWebSpeech]);
 
   // ------------------------------
   // Voice Welcome
@@ -61,12 +61,12 @@ export default function AuthScreen() {
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [isSignUp]);
+  }, [isSignUp, speak]);
 
   // Auto redirect if logged in
   useEffect(() => {
     if (isAuthenticated) router.replace("/");
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   // ------------------------------
   // Handle Login/Register
@@ -135,7 +135,7 @@ export default function AuthScreen() {
                 <Ionicons name="mic" size={28} color="white" />
               </View>
               <Text style={styles.voiceText}>
-                Komandat me zë janë aktive. Thuaj "ndihmë" për asistencë.
+                Komandat me zë janë aktive. Thuaj &ldquo;ndihmë&rdquo; për asistencë.
               </Text>
             </View>
 

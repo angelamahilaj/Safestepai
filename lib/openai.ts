@@ -5,10 +5,24 @@ interface Message {
   content: ({ type: 'text'; text: string } | { type: 'image'; image: string })[];
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('OpenAI API key is not configured. Please set EXPO_PUBLIC_OPENAI_API_KEY.');
+    }
+    
+    openaiInstance = new OpenAI({
+      apiKey,
+      dangerouslyAllowBrowser: true,
+    });
+  }
+  
+  return openaiInstance;
+}
 
 export async function generateText(config: { messages: Message[] }): Promise<string> {
   try {
@@ -38,6 +52,8 @@ export async function generateText(config: { messages: Message[] }): Promise<str
       };
     });
 
+    const openai = getOpenAI();
+    
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: formattedMessages as any,

@@ -5,14 +5,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { generateText } from '@/lib/openai';
+import { trpc } from '@/lib/trpc';
 import Colors from '@/constants/colors';
 
 export default function VisionScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate } = useAccessibility();
   const [permission, requestPermission] = useCameraPermissions();
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const analyzeMutation = trpc.vision.analyze.useMutation();
   const [lastDescription, setLastDescription] = useState('');
   const cameraRef = useRef<CameraView>(null);
 
@@ -51,9 +51,8 @@ export default function VisionScreen() {
   }
 
   const captureAndAnalyze = async () => {
-    if (!cameraRef.current || isAnalyzing) return;
+    if (!cameraRef.current || analyzeMutation.isPending) return;
 
-    setIsAnalyzing(true);
     announceAndVibrate('Duke analizuar skenën. Ju lutem prisni.', 'medium');
 
     try {
@@ -68,46 +67,25 @@ export default function VisionScreen() {
         throw new Error('Failed to capture image');
       }
 
-      console.log('[Vision] Image captured successfully, size:', photo.base64.length);
-      console.log('[Vision] Sending to AI for analysis...');
-
-      console.log('[Vision] Calling generateText API...');
+      console.log('[Vision] Image captured successfully');
+      console.log('[Vision] Sending to backend for analysis...');
       
-      const description = await generateText({
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
-              },
-              {
-                type: 'image',
-                image: `data:image/jpeg;base64,${photo.base64}`,
-              },
-            ],
-          },
-        ],
+      const result = await analyzeMutation.mutateAsync({
+        imageBase64: `data:image/jpeg;base64,${photo.base64}`,
+        prompt: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
       });
       
-      console.log('[Vision] API response received successfully');
+      console.log('[Vision] Analysis completed successfully');
       
-      if (!description || typeof description !== 'string') {
+      if (!result?.description) {
         throw new Error('Përgjigje e pavlefshme nga AI');
       }
 
-      console.log('[Vision] Description received successfully');
-      setLastDescription(description);
-      speak(description);
+      setLastDescription(result.description);
+      speak(result.description);
       announceAndVibrate('Analiza u krye', 'success');
     } catch (error: any) {
       console.error('[Vision] Error:', error);
-      console.error('[Vision] Error details:', {
-        name: error?.name,
-        message: error?.message,
-        type: typeof error,
-      });
       
       let errorMessage = 'Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.';
       
@@ -119,17 +97,11 @@ export default function VisionScreen() {
         errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
       } else if (errorStr.toLowerCase().includes('timeout')) {
         errorMessage = 'Koha e pritjes skadoi. Ju lutem provoni përsëri.';
-      } else if (errorStr.includes('pavlefshme')) {
-        errorMessage = 'Përgjigje e pavlefshme nga AI. Ju lutem provoni përsëri.';
       }
-      
-      console.error('[Vision] User-facing error:', errorMessage);
       
       speak(errorMessage);
       announceAndVibrate('Analiza dështoi', 'error');
       setLastDescription(errorMessage);
-    } finally {
-      setIsAnalyzing(false);
     }
   };
 
@@ -160,14 +132,14 @@ export default function VisionScreen() {
 
           <View style={styles.bottomBar}>
             <Pressable
-              style={[styles.captureButton, isAnalyzing && styles.captureButtonDisabled]}
+              style={[styles.captureButton, analyzeMutation.isPending && styles.captureButtonDisabled]}
               onPress={captureAndAnalyze}
-              disabled={isAnalyzing}
-              accessibilityLabel={isAnalyzing ? 'Duke analizuar skenën' : 'Kapo dhe analizo skenën'}
+              disabled={analyzeMutation.isPending}
+              accessibilityLabel={analyzeMutation.isPending ? 'Duke analizuar skenën' : 'Kapo dhe analizo skenën'}
               accessibilityRole="button"
               accessibilityHint="Merr një fotografi dhe përshkruan atë që shikon kamera"
             >
-              {isAnalyzing ? (
+              {analyzeMutation.isPending ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
                   <Text style={styles.captureButtonText}>Duke analizuar...</Text>

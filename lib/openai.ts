@@ -1,8 +1,4 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-});
+import { generateText as rorkGenerateText } from '@rork-ai/toolkit-sdk';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -11,37 +7,21 @@ interface Message {
 
 export async function generateText(config: { messages: Message[] }): Promise<string> {
   try {
-    console.log('[OpenAI] Sending request to OpenAI...');
+    console.log('[AI] Sending request to Rork AI...');
 
-    const openaiMessages = config.messages.map((msg) => {
-      const content = msg.content.map((item) => {
-        if (item.type === 'text') {
-          return { type: 'text' as const, text: item.text };
-        } else {
-          return {
-            type: 'image_url' as const,
-            image_url: { url: item.image },
-          };
-        }
-      });
+    const formattedMessages = config.messages.map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
-      return {
-        role: msg.role as 'user',
-        content,
-      };
+    const result = await rorkGenerateText({
+      messages: formattedMessages as any,
     });
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: openaiMessages,
-      max_tokens: 500,
-    });
-
-    const result = response.choices[0]?.message?.content || '';
-    console.log('[OpenAI] Response received successfully');
+    console.log('[AI] Response received successfully');
     return result;
   } catch (error: any) {
-    console.error('[OpenAI] Error:', error);
+    console.error('[AI] Error:', error);
     throw new Error(error?.message || 'Failed to generate text');
   }
 }

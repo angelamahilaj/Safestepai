@@ -5,14 +5,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { generateText } from '@/lib/openai';
+import { trpc } from '@/lib/trpc';
 import Colors from '@/constants/colors';
 
 export default function CurrencyScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate } = useAccessibility();
   const [permission, requestPermission] = useCameraPermissions();
-  const [isIdentifying, setIsIdentifying] = useState(false);
+  const identifyMutation = trpc.currency.identify.useMutation();
   const [lastResult, setLastResult] = useState('');
   const cameraRef = useRef<CameraView>(null);
 
@@ -51,9 +51,7 @@ export default function CurrencyScreen() {
   }
 
   const captureAndIdentify = async () => {
-    if (!cameraRef.current || isIdentifying) return;
-
-    setIsIdentifying(true);
+    if (!cameraRef.current || identifyMutation.isPending) return;
     announceAndVibrate('Duke identifikuar valutën. Ju lutem prisni.', 'medium');
 
     try {
@@ -68,30 +66,21 @@ export default function CurrencyScreen() {
         throw new Error('Failed to capture image');
       }
 
-      console.log('[Currency] Image captured successfully, size:', photo.base64.length);
-      console.log('[Currency] Sending to AI for currency identification...');
+      console.log('[Currency] Image captured successfully');
+      console.log('[Currency] Sending to backend for identification...');
 
-      const result = await generateText({
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Identifiko çdo valutë (bankënota ose monedha) në këtë imazh. Specifiko vlerën, llojin e valutës (Lekë, USD, EUR, GBP, etj.), dhe çdo detaj tjetër relevant. Nëse ka disa kartëmonedha ose monedha, listoji të gjitha. Nëse nuk ka valutë të dukshme, thuaj "Nuk u zbulua valutë në këtë imazh" në shqip.',
-              },
-              {
-                type: 'image',
-                image: `data:image/jpeg;base64,${photo.base64}`,
-              },
-            ],
-          },
-        ],
+      const result = await identifyMutation.mutateAsync({
+        imageBase64: `data:image/jpeg;base64,${photo.base64}`,
       });
 
-      console.log('[Currency] Identification successful');
-      setLastResult(result);
-      speak(result);
+      console.log('[Currency] Identification completed successfully');
+      
+      if (!result?.result) {
+        throw new Error('Përgjigje e pavlefshme nga AI');
+      }
+
+      setLastResult(result.result);
+      speak(result.result);
       announceAndVibrate('Identifikimi u krye', 'success');
     } catch (error: any) {
       console.error('[Currency] Error details:', {
@@ -101,20 +90,21 @@ export default function CurrencyScreen() {
         cause: error?.cause,
       });
       
-      let errorMessage = 'Na vjen keq, nuk mund të identifikoj valutën.';
+      let errorMessage = 'Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.';
       
-      if (error?.message?.includes('Network request failed')) {
-        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
-        console.error('[Currency] Network request failed - check internet connection');
-      } else if (error?.message?.includes('Failed to capture image')) {
+      const errorStr = String(error?.message || error || '');
+      
+      if (errorStr.toLowerCase().includes('network') || errorStr.toLowerCase().includes('fetch failed')) {
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit.';
+      } else if (errorStr.toLowerCase().includes('camera') || errorStr.includes('capture')) {
         errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
+      } else if (errorStr.toLowerCase().includes('timeout')) {
+        errorMessage = 'Koha e pritjes skadoi. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);
       announceAndVibrate('Identifikimi dështoi', 'error');
       setLastResult(errorMessage);
-    } finally {
-      setIsIdentifying(false);
     }
   };
 
@@ -145,14 +135,14 @@ export default function CurrencyScreen() {
 
           <View style={styles.bottomBar}>
             <Pressable
-              style={[styles.captureButton, isIdentifying && styles.captureButtonDisabled]}
+              style={[styles.captureButton, identifyMutation.isPending && styles.captureButtonDisabled]}
               onPress={captureAndIdentify}
-              disabled={isIdentifying}
-              accessibilityLabel={isIdentifying ? 'Duke identifikuar valutën' : 'Kapo dhe identifiko valutën'}
+              disabled={identifyMutation.isPending}
+              accessibilityLabel={identifyMutation.isPending ? 'Duke identifikuar valutën' : 'Kapo dhe identifiko valutën'}
               accessibilityRole="button"
               accessibilityHint="Merr një fotografi dhe identifikon valutën"
             >
-              {isIdentifying ? (
+              {identifyMutation.isPending ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
                   <Text style={styles.captureButtonText}>Duke identifikuar...</Text>

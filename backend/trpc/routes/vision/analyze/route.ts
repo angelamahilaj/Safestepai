@@ -1,6 +1,10 @@
 import { publicProcedure } from '@/backend/trpc/create-context';
 import { z } from 'zod';
-import { generateText } from '@rork-ai/toolkit-sdk';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
+});
 
 export default publicProcedure
   .input(
@@ -12,10 +16,10 @@ export default publicProcedure
   .mutation(async ({ input }) => {
     try {
       console.log('[Vision API] Processing image analysis request');
-      console.log('[Vision API] EXPO_PUBLIC_TOOLKIT_URL:', process.env.EXPO_PUBLIC_TOOLKIT_URL);
       console.log('[Vision API] Image size:', input.imageBase64.length);
 
-      const result = await generateText({
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',
@@ -25,14 +29,18 @@ export default publicProcedure
                 text: input.prompt,
               },
               {
-                type: 'image',
-                image: input.imageBase64,
+                type: 'image_url',
+                image_url: {
+                  url: input.imageBase64,
+                },
               },
             ],
           },
         ],
+        max_tokens: 1000,
       });
 
+      const result = response.choices[0]?.message?.content || '';
       console.log('[Vision API] Analysis completed successfully');
       
       return { description: result };

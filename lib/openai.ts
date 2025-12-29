@@ -1,27 +1,50 @@
-import { generateText as rorkGenerateText } from '@rork-ai/toolkit-sdk';
+import OpenAI from 'openai';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
   content: ({ type: 'text'; text: string } | { type: 'image'; image: string })[];
 }
 
+const openai = new OpenAI({
+  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true,
+});
+
 export async function generateText(config: { messages: Message[] }): Promise<string> {
   try {
-    console.log('[AI] Sending request to Rork AI...');
-    console.log('[AI] EXPO_PUBLIC_TOOLKIT_URL:', process.env.EXPO_PUBLIC_TOOLKIT_URL);
+    console.log('[AI] Sending request to OpenAI...');
     console.log('[AI] Message count:', config.messages.length);
 
-    const formattedMessages = config.messages.map((msg) => ({
-      role: msg.role,
-      content: msg.content,
-    }));
+    const formattedMessages = config.messages.map((msg) => {
+      const content = msg.content.map((item) => {
+        if (item.type === 'text') {
+          return {
+            type: 'text' as const,
+            text: item.text,
+          };
+        } else {
+          return {
+            type: 'image_url' as const,
+            image_url: {
+              url: item.image,
+            },
+          };
+        }
+      });
 
-    console.log('[AI] Formatted messages:', JSON.stringify(formattedMessages[0], null, 2).substring(0, 500));
-
-    const result = await rorkGenerateText({
-      messages: formattedMessages as any,
+      return {
+        role: msg.role,
+        content,
+      };
     });
 
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: formattedMessages as any,
+      max_tokens: 1000,
+    });
+
+    const result = response.choices[0]?.message?.content || '';
     console.log('[AI] Response received successfully');
     return result;
   } catch (error: any) {

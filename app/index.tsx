@@ -11,9 +11,13 @@ import { useEffect, useState, useRef } from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { speak, announceAndVibrate, initializeWebSpeech } = useAccessibility();
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const { connectedGlasses, connectedStick, isScanning, connectDevice, disconnectDevice } = useDevice();
+  const accessibility = useAccessibility();
+  const auth = useAuth();
+  const device = useDevice();
+  
+  const { speak, announceAndVibrate, initializeWebSpeech } = accessibility || {};
+  const { user, isAuthenticated, isLoading } = auth || {};
+  const { connectedGlasses, connectedStick, isScanning, connectDevice, disconnectDevice } = device || {};
   const [isListening, setIsListening] = useState(false);
   const isInitialized = useRef(false);
   const welcomeSpoken = useRef(false);
@@ -25,7 +29,7 @@ export default function HomeScreen() {
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    if (isAuthenticated && user && !welcomeSpoken.current) {
+    if (isAuthenticated && user && !welcomeSpoken.current && speak) {
       const timer = setTimeout(() => {
         if (Platform.OS !== 'web') {
           speak(`Mirë se erdhe ${user.name}. Safe Step A I është gati për t'ju ndihmuar.`);

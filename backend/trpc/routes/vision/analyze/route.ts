@@ -12,6 +12,8 @@ export default publicProcedure
   .mutation(async ({ input }) => {
     try {
       console.log('[Vision API] Processing image analysis request');
+      console.log('[Vision API] EXPO_PUBLIC_TOOLKIT_URL:', process.env.EXPO_PUBLIC_TOOLKIT_URL);
+      console.log('[Vision API] Image size:', input.imageBase64.length);
 
       const result = await generateText({
         messages: [
@@ -35,7 +37,13 @@ export default publicProcedure
       
       return { description: result };
     } catch (error: any) {
-      console.error('[Vision API] Error:', error);
+      console.error('[Vision API] Detailed error:', {
+        message: error?.message,
+        name: error?.name,
+        stack: error?.stack?.substring(0, 500),
+        status: error?.status,
+        statusText: error?.statusText,
+      });
       throw new Error(error?.message || 'Failed to analyze image');
     }
   });

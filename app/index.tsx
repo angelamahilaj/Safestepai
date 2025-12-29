@@ -15,9 +15,9 @@ export default function HomeScreen() {
   const auth = useAuth();
   const device = useDevice();
   
-  const { speak, announceAndVibrate, initializeWebSpeech } = accessibility || {};
-  const { user, isAuthenticated, isLoading } = auth || {};
-  const { connectedGlasses, connectedStick, isScanning, connectDevice, disconnectDevice } = device || {};
+  const { speak, announceAndVibrate, initializeWebSpeech } = accessibility;
+  const { user, isAuthenticated, isLoading } = auth;
+  const { connectedGlasses, connectedStick, isScanning, connectDevice, disconnectDevice } = device;
   const [isListening, setIsListening] = useState(false);
   const isInitialized = useRef(false);
   const welcomeSpoken = useRef(false);

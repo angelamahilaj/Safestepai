@@ -1,7 +1,8 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useCallback, useMemo } from 'react';
 import { Platform, Alert } from 'react-native';
-import { useAccessibility } from './AccessibilityContext';
+import * as Speech from 'expo-speech';
+import * as Haptics from 'expo-haptics';
 
 type DeviceType = 'glasses' | 'stick' | null;
 
@@ -16,7 +17,46 @@ export const [DeviceProvider, useDevice] = createContextHook(() => {
   const [connectedGlasses, setConnectedGlasses] = useState<ConnectedDevice | null>(null);
   const [connectedStick, setConnectedStick] = useState<ConnectedDevice | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const { speak, announceAndVibrate } = useAccessibility();
+
+  const speak = useCallback((text: string) => {
+    if (Platform.OS !== 'web') {
+      Speech.speak(text, { language: 'sq-AL' });
+    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'sq-AL';
+      window.speechSynthesis.speak(utterance);
+    }
+  }, []);
+
+  const announceAndVibrate = useCallback((text: string, type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error') => {
+    if (Platform.OS !== 'web') {
+      try {
+        switch (type) {
+          case 'light':
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            break;
+          case 'medium':
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            break;
+          case 'heavy':
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            break;
+          case 'success':
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            break;
+          case 'warning':
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            break;
+          case 'error':
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            break;
+        }
+      } catch (error) {
+        console.error('[Haptics] Error:', error);
+      }
+    }
+    speak(text);
+  }, [speak]);
 
   const connectDevice = useCallback(async (deviceType: 'glasses' | 'stick') => {
     console.log(`[Device] Attempting to connect ${deviceType}`);

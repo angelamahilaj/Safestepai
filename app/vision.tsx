@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import OpenAI from 'openai';
+import { generateText } from '@rork-ai/toolkit-sdk';
 import Colors from '@/constants/colors';
 
 export default function VisionScreen() {
@@ -73,12 +73,7 @@ export default function VisionScreen() {
 
       console.log('[Vision] Calling generateText API...');
       
-      const openai = new OpenAI({
-        apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+      const description = await generateText({
         messages: [
           {
             role: 'user',
@@ -88,17 +83,13 @@ export default function VisionScreen() {
                 text: 'Përshkruaj këtë skenë në detaje për një person të verbër në shqip. Përfshi objektet, njerëzit, ngjyrat, marrëdhëniet hapësinore, rreziqet e mundshme dhe çdo tekst të dukshëm. Jini specifik dhe i dobishëm.',
               },
               {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${photo.base64}`,
-                },
+                type: 'image',
+                image: `data:image/jpeg;base64,${photo.base64}`,
               },
             ],
           },
         ],
       });
-
-      const description = response.choices[0]?.message?.content || 'Përgjigje e pavlefshme nga AI';
       
       console.log('[Vision] API response received successfully');
       

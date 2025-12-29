@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import OpenAI from 'openai';
+import { generateText } from '@rork-ai/toolkit-sdk';
 import Colors from '@/constants/colors';
 
 export default function CurrencyScreen() {
@@ -71,32 +71,23 @@ export default function CurrencyScreen() {
       console.log('[Currency] Image captured successfully, size:', photo.base64.length);
       console.log('[Currency] Sending to AI for currency identification...');
 
-      const openai = new OpenAI({
-        apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
+      const result = await generateText({
         messages: [
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Identify any currency (banknotes or coins) in this image. Specify the denomination, currency type (USD, EUR, GBP, etc.), and any other relevant details. If there are multiple bills or coins, list them all. If no currency is visible, say "No currency detected in this image."',
+                text: 'Identifiko çdo valutë (bankënota ose monedha) në këtë imazh. Specifiko vlerën, llojin e valutës (Lekë, USD, EUR, GBP, etj.), dhe çdo detaj tjetër relevant. Nëse ka disa kartëmonedha ose monedha, listoji të gjitha. Nëse nuk ka valutë të dukshme, thuaj "Nuk u zbulua valutë në këtë imazh" në shqip.',
               },
               {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${photo.base64}`,
-                },
+                type: 'image',
+                image: `data:image/jpeg;base64,${photo.base64}`,
               },
             ],
           },
         ],
       });
-
-      const result = response.choices[0]?.message?.content || 'No response from AI';
 
       console.log('[Currency] Identification successful');
       setLastResult(result);

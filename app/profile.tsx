@@ -15,7 +15,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.replace('/auth');
+      router.replace('/auth' as any);
     }
   }, [isAuthenticated, router]);
 
@@ -34,7 +34,7 @@ export default function ProfileScreen() {
     const result = await signOut();
     if (result.success) {
       announceAndVibrate('Dolët me sukses', 'success');
-      router.replace('/auth');
+      router.replace('/auth' as any);
     } else {
       announceAndVibrate('Dështoi dalja', 'error');
     }
@@ -107,7 +107,7 @@ export default function ProfileScreen() {
               icon={<Edit size={24} color={Colors.white} />}
               onPress={() => {
                 announceAndVibrate('Duke hapur redaktimin e profilit', 'light');
-                router.push('/edit-profile');
+                router.push('/edit-profile' as any);
               }}
               variant="secondary"
               accessibilityLabel="Butoni ndrysho informacionin personal"
@@ -188,7 +188,7 @@ export default function ProfileScreen() {
               icon={<Heart size={24} color={Colors.white} />}
               onPress={() => {
                 announceAndVibrate('Duke hapur redaktuesin e informacionit mjekësor', 'light');
-                router.push('/medical-info');
+                router.push('/medical-info' as any);
               }}
               accessibilityLabel={medicalInfo ? "Butoni ndrysho informacionin mjekësor" : "Butoni shto informacion mjekësor"}
               accessibilityHint="Hap ekranin për të menaxhuar informacionin tuaj mjekësor, duke përfshirë alergji, ilaçe dhe kontakte emergjente"

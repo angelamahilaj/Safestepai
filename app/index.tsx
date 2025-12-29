@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/auth');
+      router.replace('/auth' as any);
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -61,7 +61,7 @@ export default function HomeScreen() {
                   isInitialized.current = true;
                 }
                 announceAndVibrate('Profili juaj', 'light');
-                router.push('/profile');
+                router.push('/profile' as any);
               }}
               accessibilityLabel="Butoni i profilit tuaj"
               accessibilityHint="Shikoni dhe redaktoni profilin dhe informacionin mjekësor"
@@ -171,7 +171,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Çfarë Sheh?"
               icon={<Eye size={48} color={Colors.white} />}
-              onPress={() => router.push('/vision')}
+              onPress={() => router.push('/vision' as any)}
               accessibilityLabel="Çfarë sheh? Hap kamerën për të përshkruar rrethinën tuaj"
               accessibilityHint="Aktivizon vizionin AI për të përshkruar atë që shikon kamera"
             />
@@ -179,7 +179,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Lexo Tekst"
               icon={<FileText size={48} color={Colors.white} />}
-              onPress={() => router.push('/text-reader')}
+              onPress={() => router.push('/text-reader' as any)}
               variant="secondary"
               accessibilityLabel="Lexo tekst. Hap kamerën për të lexuar tekst nga dokumentet dhe tabelat"
               accessibilityHint="Përdor OCR për të lexuar tekstin me zë të lartë"
@@ -188,7 +188,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Identifiko Valutë"
               icon={<Banknote size={48} color={Colors.white} />}
-              onPress={() => router.push('/currency')}
+              onPress={() => router.push('/currency' as any)}
               accessibilityLabel="Identifiko valutë. Hap kamerën për të njohur bankënotat"
               accessibilityHint="Identifikon vlerën e parasë"
             />
@@ -196,7 +196,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Navigim"
               icon={<Navigation2 size={48} color={Colors.white} />}
-              onPress={() => router.push('/navigation')}
+              onPress={() => router.push('/navigation' as any)}
               accessibilityLabel="Navigim. Hap navigimin dhe ndihmën për lëvizshmëri"
               accessibilityHint="Udhëzime hap pas hapi dhe zbulim pengesash"
             />
@@ -204,7 +204,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Ku Jam?"
               icon={<MapPin size={48} color={Colors.white} />}
-              onPress={() => router.push('/location')}
+              onPress={() => router.push('/location' as any)}
               variant="secondary"
               accessibilityLabel="Ku jam? Merr vendndodhjen tuaj aktuale"
               accessibilityHint="Jep adresën tuaj aktuale dhe pikat e referimit në afërsi"
@@ -213,7 +213,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="Monitorim Shëndetësor"
               icon={<Heart size={48} color={Colors.white} />}
-              onPress={() => router.push('/health')}
+              onPress={() => router.push('/health' as any)}
               variant="secondary"
               accessibilityLabel="Monitorim shëndetësor. Gjurmoni shëndetin dhe ilaçet tuaja"
               accessibilityHint="Kujtuese për ilaçe dhe gjurmim shëndetësor"
@@ -222,7 +222,7 @@ export default function HomeScreen() {
             <AccessibleButton
               title="SOS EMERGJENCË"
               icon={<AlertCircle size={56} color={Colors.white} />}
-              onPress={() => router.push('/emergency')}
+              onPress={() => router.push('/emergency' as any)}
               variant="emergency"
               accessibilityLabel="SOS Emergjencë. Akses i shpejtë në ndihmë emergjence"
               accessibilityHint="Hap opsionet e kontaktit të emergjencës"

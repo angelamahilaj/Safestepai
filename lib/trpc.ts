@@ -10,14 +10,14 @@ const getBaseUrl = () => {
     const baseUrl = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
     
     if (!baseUrl) {
-      console.warn('[tRPC] EXPO_PUBLIC_RORK_API_BASE_URL not found, using fallback');
-      return 'http://localhost:3000';
+      console.warn("[tRPC] EXPO_PUBLIC_RORK_API_BASE_URL not found, using fallback");
+      return "http://localhost:3000";
     }
 
     return baseUrl;
   } catch (error) {
-    console.error('[tRPC] Error getting base URL:', error);
-    return 'http://localhost:3000';
+    console.error("[tRPC] Error getting base URL:", error);
+    return "http://localhost:3000";
   }
 };
 

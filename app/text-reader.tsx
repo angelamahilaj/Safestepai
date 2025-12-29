@@ -5,14 +5,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { X, Camera, Loader2 } from 'lucide-react-native';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { generateText } from '@/lib/openai';
+import { trpc } from '@/lib/trpc';
 import Colors from '@/constants/colors';
 
 export default function TextReaderScreen() {
   const router = useRouter();
   const { speak, announceAndVibrate } = useAccessibility();
   const [permission, requestPermission] = useCameraPermissions();
-  const [isReading, setIsReading] = useState(false);
+  const readMutation = trpc.text.read.useMutation();
   const [lastText, setLastText] = useState('');
   const cameraRef = useRef<CameraView>(null);
 
@@ -51,9 +51,8 @@ export default function TextReaderScreen() {
   }
 
   const captureAndRead = async () => {
-    if (!cameraRef.current || isReading) return;
+    if (!cameraRef.current || readMutation.isPending) return;
 
-    setIsReading(true);
     announceAndVibrate('Duke lexuar tekstin. Ju lutem prisni.', 'medium');
 
     try {
@@ -68,53 +67,40 @@ export default function TextReaderScreen() {
         throw new Error('Failed to capture image');
       }
 
-      console.log('[TextReader] Image captured successfully, size:', photo.base64.length);
-      console.log('[TextReader] Sending to AI for text extraction...');
+      console.log('[TextReader] Image captured successfully');
+      console.log('[TextReader] Sending to backend for text extraction...');
 
-      const text = await generateText({
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Extract and read all visible text from this image. Include all words, numbers, labels, signs, and any written content. If there is no text, say "No readable text found in this image."',
-              },
-              {
-                type: 'image',
-                image: `data:image/jpeg;base64,${photo.base64}`,
-              },
-            ],
-          },
-        ],
+      const result = await readMutation.mutateAsync({
+        imageBase64: `data:image/jpeg;base64,${photo.base64}`,
       });
 
-      console.log('[TextReader] Text extracted successfully');
-      setLastText(text);
-      speak(text);
+      console.log('[TextReader] Text extraction completed successfully');
+      
+      if (!result?.text) {
+        throw new Error('Përgjigje e pavlefshme nga AI');
+      }
+
+      setLastText(result.text);
+      speak(result.text);
       announceAndVibrate('Leximi u krye', 'success');
     } catch (error: any) {
-      console.error('[TextReader] Error details:', {
-        message: error?.message,
-        name: error?.name,
-        stack: error?.stack,
-        cause: error?.cause,
-      });
+      console.error('[TextReader] Error:', error);
       
-      let errorMessage = 'Na vjen keq, nuk mund të lexoj tekstin.';
+      let errorMessage = 'Shërbimi i AI nuk është i disponueshëm aktualisht. Ju lutem provoni përsëri më vonë.';
       
-      if (error?.message?.includes('Network request failed')) {
-        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit dhe provoni përsëri.';
-        console.error('[TextReader] Network request failed - check internet connection');
-      } else if (error?.message?.includes('Failed to capture image')) {
+      const errorStr = String(error?.message || error || '');
+      
+      if (errorStr.toLowerCase().includes('network') || errorStr.toLowerCase().includes('fetch failed')) {
+        errorMessage = 'Gabim në rrjet. Ju lutem kontrolloni lidhjen tuaj të internetit.';
+      } else if (errorStr.toLowerCase().includes('camera') || errorStr.includes('capture')) {
         errorMessage = 'Gabim në kamerë. Ju lutem provoni përsëri.';
+      } else if (errorStr.toLowerCase().includes('timeout')) {
+        errorMessage = 'Koha e pritjes skadoi. Ju lutem provoni përsëri.';
       }
       
       speak(errorMessage);
       announceAndVibrate('Leximi dështoi', 'error');
       setLastText(errorMessage);
-    } finally {
-      setIsReading(false);
     }
   };
 
@@ -145,14 +131,14 @@ export default function TextReaderScreen() {
 
           <View style={styles.bottomBar}>
             <Pressable
-              style={[styles.captureButton, isReading && styles.captureButtonDisabled]}
+              style={[styles.captureButton, readMutation.isPending && styles.captureButtonDisabled]}
               onPress={captureAndRead}
-              disabled={isReading}
-              accessibilityLabel={isReading ? 'Duke lexuar tekstin' : 'Kapo dhe lexo tekstin'}
+              disabled={readMutation.isPending}
+              accessibilityLabel={readMutation.isPending ? 'Duke lexuar tekstin' : 'Kapo dhe lexo tekstin'}
               accessibilityRole="button"
               accessibilityHint="Merr një fotografi dhe lexon tekstin me zë të lartë"
             >
-              {isReading ? (
+              {readMutation.isPending ? (
                 <>
                   <Loader2 size={40} color={Colors.white} />
                   <Text style={styles.captureButtonText}>Duke lexuar...</Text>

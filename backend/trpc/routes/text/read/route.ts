@@ -14,9 +14,12 @@ export default publicProcedure
       console.log('[Text API] Image size:', input.imageBase64.length);
       console.log('[Text API] API Key present:', !!process.env.EXPO_PUBLIC_OPENAI_API_KEY);
 
+      if (!process.env.EXPO_PUBLIC_OPENAI_API_KEY) {
+        throw new Error('OpenAI API key is not configured');
+      }
+
       const openai = new OpenAI({
         apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-        dangerouslyAllowBrowser: true,
       });
 
       const response = await openai.chat.completions.create({

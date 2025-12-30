@@ -2,10 +2,6 @@ import { publicProcedure } from '@/backend/trpc/create-context';
 import { z } from 'zod';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
-});
-
 export default publicProcedure
   .input(
     z.object({
@@ -16,6 +12,12 @@ export default publicProcedure
     try {
       console.log('[Currency API] Processing currency identification request');
       console.log('[Currency API] Image size:', input.imageBase64.length);
+      console.log('[Currency API] API Key present:', !!process.env.EXPO_PUBLIC_OPENAI_API_KEY);
+
+      const openai = new OpenAI({
+        apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true,
+      });
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o',
